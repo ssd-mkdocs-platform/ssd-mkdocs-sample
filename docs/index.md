@@ -184,7 +184,7 @@ uv run mkdocs build
 
 ## 📜 ライセンス
 
-MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照してください。
+MIT License - 詳細は [LICENSE](license.md) ファイルを参照してください。
 
 ## 🆘 トラブルシューティング
 

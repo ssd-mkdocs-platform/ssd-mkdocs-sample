@@ -1,0 +1,45 @@
+site_name: Spec Driven Docs Infra
+site_description: Best practices for business system documentation and a collection of Mermaid diagram samples
+site_author: Documentation Team
+copyright: Copyright &copy; 2024 @nuits.jp
+
+theme:
+  name: material
+  language: ja
+
+extra_css:
+  - stylesheets/pdf-fixes.css
+
+extra_javascript:
+  - https://unpkg.com/mermaid/dist/mermaid.min.js
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+  - pymdownx.highlight
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mermaid-to-svg:
+      image_id_enabled: true
+      image_id_prefix: mermaid-diagram
+      # Disable HTML labels for PDF compatibility
+      mermaid_config:
+        htmlLabels: false
+        flowchart:
+          htmlLabels: false
+        class:
+          htmlLabels: false
+  - svg-to-png:
+  - to-pdf:
+      cover_subtitle: 'ドキュメンテーション戦略'
+      toc_title: 目次
+      toc_level: 3
+      output_path: pdf/ドキュメンテーション戦略.pdf
