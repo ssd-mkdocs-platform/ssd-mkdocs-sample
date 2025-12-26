@@ -182,10 +182,6 @@ uv run mkdocs build
 3. 変更をコミット
 4. プルリクエストを送信
 
-## 📜 ライセンス
-
-MIT License - 詳細は [LICENSE](license.md) ファイルを参照してください。
-
 ## 🆘 トラブルシューティング
 
 ### よくある問題
