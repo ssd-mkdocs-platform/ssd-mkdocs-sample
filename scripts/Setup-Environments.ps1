@@ -1,8 +1,60 @@
-﻿# MkDocs環境セットアップスクリプト
+# MkDocs環境セットアップスクリプト
 # uvを使用してPython環境とパッケージを管理
+
+[CmdletBinding()]
+param(
+    [string] $ProjectRoot
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+$script:SetupEnvironmentsScriptPath = $PSCommandPath
+
+if (-not $script:WingetInvoker) {
+    $script:WingetInvoker = { winget @args }
+}
+
+if (-not $script:NpmInvoker) {
+    $script:NpmInvoker = { npm @args }
+}
+
+if (-not $script:UvInvoker) {
+    $script:UvInvoker = { uv @args }
+}
+
+if (-not $script:TestPathInvoker) {
+    $script:TestPathInvoker = {
+        param(
+            [string] $Path,
+            [string] $PathType,
+            [System.Management.Automation.ActionPreference] $ErrorAction
+        )
+        Test-Path -Path $Path -PathType $PathType -ErrorAction $ErrorAction
+    }
+}
+
+if (-not $script:GetChildItemInvoker) {
+    $script:GetChildItemInvoker = {
+        param(
+            [string] $Path,
+            [switch] $Force,
+            [System.Management.Automation.ActionPreference] $ErrorAction
+        )
+        Get-ChildItem -Path $Path -Force:$Force -ErrorAction $ErrorAction
+    }
+}
+
+if (-not $script:SetLocationInvoker) {
+    $script:SetLocationInvoker = {
+        param([string] $Path)
+        Set-Location -Path $Path
+    }
+}
+
+if (-not $script:GetLocationInvoker) {
+    $script:GetLocationInvoker = { Get-Location }
+}
 
 function Install-WingetPackage {
     param(
@@ -11,14 +63,14 @@ function Install-WingetPackage {
         [string] $Name = $Id
     )
 
-    $installed = winget list --id $Id -e --source winget --accept-source-agreements 2>$null | Where-Object { $_ -match [regex]::Escape($Id) }
+    $installed = (& $script:WingetInvoker 'list' '--id' $Id '-e' '--source' 'winget' '--accept-source-agreements' 2>$null) | Where-Object { $_ -match [regex]::Escape($Id) }
     if ($installed) {
         Write-Host "$Name は既にインストール済みのためスキップします。" -ForegroundColor Green
         return
     }
 
     Write-Host "$Name をインストールしています..." -ForegroundColor Yellow
-    winget install --id $Id -e --silent --accept-package-agreements --accept-source-agreements
+    & $script:WingetInvoker 'install' '--id' $Id '-e' '--silent' '--accept-package-agreements' '--accept-source-agreements'
 }
 
 function Update-Path {
@@ -34,10 +86,9 @@ function Install-NpmGlobalPackage {
         [string] $Name = $Package
     )
 
-    $npmListJson = npm list -g --depth=0 --json --long 2>$null
     $npmList = $null
     try {
-        $npmList = $npmListJson | ConvertFrom-Json
+        $npmList = (& $script:NpmInvoker 'list' '-g' '--depth=0' '--json' '--long' 2>$null) | ConvertFrom-Json
     }
     catch {
         Write-Host "npmのインストール状況を取得できなかったため、${Name} をインストールします。" -ForegroundColor Yellow
@@ -45,7 +96,8 @@ function Install-NpmGlobalPackage {
 
     $npmInstalled = $false
     if ($npmList -and $npmList.dependencies) {
-        $npmInstalled = $npmList.dependencies.PSObject.Properties.Name -contains $Package
+        $dependencyNames = @($npmList.dependencies.PSObject.Properties | Select-Object -ExpandProperty Name)
+        $npmInstalled = $dependencyNames -contains $Package
     }
 
     if ($npmInstalled) {
@@ -54,14 +106,15 @@ function Install-NpmGlobalPackage {
     }
 
     Write-Host "$Name をインストールしています..." -ForegroundColor Yellow
-    npm install -g $Package
+    & $script:NpmInvoker 'install' '-g' $Package
 }
 
 function Install-PlaywrightBrowsers {
     $playwrightDir = Join-Path $env:USERPROFILE "AppData\\Local\\ms-playwright"
-    $installed = Test-Path $playwrightDir -PathType Container -ErrorAction SilentlyContinue
+    $installed = & $script:TestPathInvoker -Path $playwrightDir -PathType Container -ErrorAction SilentlyContinue
     if ($installed) {
-        $hasBrowsers = (Get-ChildItem $playwrightDir -Force -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer }).Count -gt 0
+        $browserDirs = @(& $script:GetChildItemInvoker -Path $playwrightDir -Force -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer })
+        $hasBrowsers = $browserDirs.Count -gt 0
         if ($hasBrowsers) {
             Write-Host "Playwrightブラウザは既にインストール済みのためスキップします。" -ForegroundColor Green
             return
@@ -69,54 +122,71 @@ function Install-PlaywrightBrowsers {
     }
 
     Write-Host "Playwrightブラウザをインストールしています..." -ForegroundColor Yellow
-    uv run python -m playwright install
+    & $script:UvInvoker 'run' 'python' '-m' 'playwright' 'install'
 }
 
-Write-Host "=== MkDocsドキュメンテーション環境のセットアップを開始します ===" -ForegroundColor Green
+function Invoke-SetupEnvironments {
+    [CmdletBinding()]
+    param(
+        [string] $ProjectRoot
+    )
 
-# Python 3.13とuvをインストール
-Install-WingetPackage -Id "Python.Python.3.13" -Name "Python 3.13"
-Install-WingetPackage -Id "astral-sh.uv" -Name "uv"
+    if ($ProjectRoot) {
+        $resolvedProjectRoot = (Resolve-Path $ProjectRoot).ProviderPath
+    }
+    else {
+        $scriptPath = $script:SetupEnvironmentsScriptPath
+        if ([string]::IsNullOrEmpty($scriptPath)) {
+            throw "スクリプトのパスを取得できませんでした。"
+        }
 
-# WeasyPrintから利用するGTK+ランタイムをインストールする
-Install-WingetPackage -Id "tschoonj.GTKForWindows" -Name "GTK+ runtime (WeasyPrint)"
+        $scriptRoot = Split-Path -Parent $scriptPath
+        $resolvedProjectRoot = Split-Path -Parent $scriptRoot
+    }
 
-# Mermaid CLIをインストールするためのNode.jsをインストール
-Install-WingetPackage -Id "OpenJS.NodeJS" -Name "Node.js (Mermaid CLI)"
+    Write-Host "=== MkDocsドキュメンテーション環境のセットアップを開始します ===" -ForegroundColor Green
 
-# Mermaid CLIをインストールするためのNode.jsをインストール
-Install-WingetPackage -Id "Microsoft.AzureCLI" -Name "Azure CLI"
+    # Python 3.13とuvをインストール
+    Install-WingetPackage -Id "Python.Python.3.13" -Name "Python 3.13"
+    Install-WingetPackage -Id "astral-sh.uv" -Name "uv"
 
-# GitHub CLIをインストール
-Install-WingetPackage -Id "GitHub.cli" -Name "GitHub CLI"
+    # WeasyPrintから利用するGTK+ランタイムをインストールする
+    Install-WingetPackage -Id "tschoonj.GTKForWindows" -Name "GTK+ runtime (WeasyPrint)"
 
-# 新規インストールされたコマンドを認識させる
-Update-Path
+    # Mermaid CLIをインストールするためのNode.jsをインストール
+    Install-WingetPackage -Id "OpenJS.NodeJS" -Name "Node.js (Mermaid CLI)"
 
-# Mermaid CLIをインストール
-Install-NpmGlobalPackage -Package "@mermaid-js/mermaid-cli" -Name "Mermaid CLI"
+    # Mermaid CLIをインストールするためのNode.jsをインストール
+    Install-WingetPackage -Id "Microsoft.AzureCLI" -Name "Azure CLI"
 
-# プロジェクトディレクトリに移動
-$scriptPath = $MyInvocation.MyCommand.Path
-if ([string]::IsNullOrEmpty($scriptPath)) {
-    throw "スクリプトのパスを取得できませんでした。"
+    # GitHub CLIをインストール
+    Install-WingetPackage -Id "GitHub.cli" -Name "GitHub CLI"
+
+    # 新規インストールされたコマンドを認識させる
+    Update-Path
+
+    # Mermaid CLIをインストール
+    Install-NpmGlobalPackage -Package "@mermaid-js/mermaid-cli" -Name "Mermaid CLI"
+
+    $previousLocation = & $script:GetLocationInvoker
+
+    try {
+        & $script:SetLocationInvoker -Path $resolvedProjectRoot
+
+        # pyproject.tomlに定義された依存関係をインストール
+        Write-Host "uv sync を実行して依存関係をインストールします..." -ForegroundColor Yellow
+        & $script:UvInvoker 'sync'
+        Write-Host "uv sync が完了しました。" -ForegroundColor Green
+
+        # Playwrightブラウザのインストール
+        Install-PlaywrightBrowsers
+    }
+    finally {
+        $previousPath = if ($previousLocation -is [string]) { $previousLocation } else { $previousLocation.ProviderPath }
+        & $script:SetLocationInvoker -Path $previousPath
+    }
 }
 
-$scriptRoot = Split-Path -Parent $scriptPath
-$projectRoot = Split-Path -Parent $scriptRoot
-$previousLocation = Get-Location
-
-try {
-    Set-Location $projectRoot
-
-    # pyproject.tomlに定義された依存関係をインストール
-    Write-Host "uv sync を実行して依存関係をインストールします..." -ForegroundColor Yellow
-    uv sync
-    Write-Host "uv sync が完了しました。" -ForegroundColor Green
-
-    # Playwrightブラウザのインストール
-    Install-PlaywrightBrowsers
-}
-finally {
-    Set-Location $previousLocation
+if ($MyInvocation.InvocationName -notin @('.', 'source')) {
+    Invoke-SetupEnvironments @PSBoundParameters
 }
