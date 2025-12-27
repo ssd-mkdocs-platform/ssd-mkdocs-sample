@@ -1,0 +1,59 @@
+name: Role Sync (Released)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'
+
+permissions:
+  id-token: write
+  contents: read
+  discussions: write
+
+env:
+  SWA_NAME: stapp-swa-github-role-sync-ops-prod
+  SWA_RG: rg-swa-github-role-sync-ops-prod
+  DISCUSSION_CATEGORY: Invitation
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.ROLE_SYNC_APP_ID }}
+          private-key: ${{ secrets.ROLE_SYNC_APP_PRIVATE_KEY }}
+
+      - name: Cleanup expired discussions
+        uses: nuitsjp/swa-github-discussion-cleanup@v1
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          discussion-category-name: ${{ env.DISCUSSION_CATEGORY }}
+
+  sync-swa-roles:
+    needs: cleanup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.ROLE_SYNC_APP_ID }}
+          private-key: ${{ secrets.ROLE_SYNC_APP_PRIVATE_KEY }}
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sync SWA roles
+        uses: nuitsjp/swa-github-role-sync@v1
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          swa-name: ${{ env.SWA_NAME }}
+          swa-resource-group: ${{ env.SWA_RG }}
+          discussion-category-name: ${{ env.DISCUSSION_CATEGORY }}
