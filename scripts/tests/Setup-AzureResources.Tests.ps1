@@ -206,6 +206,56 @@ Describe 'Setup-AzureResources.ps1' {
         $global:SetupGhCalls | ForEach-Object { $_ -join ' ' } | Should -Contain 'repo view --json owner,name'
     }
 
+    It 'GitHub Secretsの出力はリポジトリ名を含めず値を表示する' {
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
+        $owner = 'nuitsjp'
+        $repository = 'spec-driven-docs-infra'
+        $defaultHostname = 'example.eastasia.azurestaticapps.net'
+        $clientId = 'client-123'
+        $principalId = 'principal-456'
+        $tenantId = 'tenant-789'
+        $subscriptionId = 'sub-000'
+        $apiKey = 'api-key-000'
+        $swaId = "/subscriptions/$subscriptionId/resourceGroups/rg-$repository-prod/providers/Microsoft.Web/staticSites/stapp-$repository-prod"
+
+        $global:SetupAzCalls = @()
+        $global:SetupGhCalls = @()
+        $global:RoleAssignmentAttempts = 0
+        $global:WriteHostMessages = @()
+
+        Mock -CommandName Write-Host -MockWith {
+            param($Object)
+            $global:WriteHostMessages += $Object
+        }
+
+        $azInvoker = {
+            $global:SetupAzCalls += ,$args
+            switch -Wildcard ($args -join ' ') {
+                'group exists*' { 'false' }
+                '*staticwebapp show*defaultHostname*' { $defaultHostname }
+                '*identity show*clientId*' { $clientId }
+                '*identity show*principalId*' { $principalId }
+                '*staticwebapp show* --query id *' { $swaId }
+                '*account show*tenantId*' { $tenantId }
+                '*account show* --query id *' { $subscriptionId }
+                '*staticwebapp secrets list*' { $apiKey }
+                'role assignment create*' { }
+            }
+        }
+
+        $ghInvoker = {
+            $global:SetupGhCalls += ,$args
+        }
+
+        & $scriptPath -Owner $owner -Repository $repository -AzInvoker $azInvoker -GhInvoker $ghInvoker
+
+        $global:WriteHostMessages | Should -Contain "✓ Set Actions secret AZURE_CLIENT_ID: $clientId"
+        $global:WriteHostMessages | Should -Contain "✓ Set Actions secret AZURE_TENANT_ID: $tenantId"
+        $global:WriteHostMessages | Should -Contain "✓ Set Actions secret AZURE_SUBSCRIPTION_ID: $subscriptionId"
+        $global:WriteHostMessages | Should -Contain '✓ Set Actions secret AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
+        ($global:WriteHostMessages | Where-Object { $_ -like "*$owner/$repository*" }).Count | Should -Be 0
+    }
+
     It 'デフォルトinvokerでOwner/Repository指定時に実行する' {
         $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $global:DefaultOwner = 'nuitsjp'

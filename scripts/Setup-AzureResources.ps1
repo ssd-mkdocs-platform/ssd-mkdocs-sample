@@ -149,15 +149,15 @@ function Invoke-SetupAzureResources {
     $subscriptionId = & $invokeAz account show --query id -o tsv
     $staticWebAppsApiToken = & $invokeAz staticwebapp secrets list --name $swaName --resource-group $resourceGroupName --query properties.apiKey -o tsv
 
-    & $invokeGh secret set AZURE_CLIENT_ID --body $clientId --repo $githubRepo
-    & $invokeGh secret set AZURE_TENANT_ID --body $tenantId --repo $githubRepo
-    & $invokeGh secret set AZURE_SUBSCRIPTION_ID --body $subscriptionId --repo $githubRepo
-    & $invokeGh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body $staticWebAppsApiToken --repo $githubRepo
+    & $invokeGh secret set AZURE_CLIENT_ID --body $clientId --repo $githubRepo | Out-Null
+    & $invokeGh secret set AZURE_TENANT_ID --body $tenantId --repo $githubRepo | Out-Null
+    & $invokeGh secret set AZURE_SUBSCRIPTION_ID --body $subscriptionId --repo $githubRepo | Out-Null
+    & $invokeGh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body $staticWebAppsApiToken --repo $githubRepo | Out-Null
 
-    Write-Host "  AZURE_CLIENT_ID: $clientId"
-    Write-Host "  AZURE_TENANT_ID: $tenantId"
-    Write-Host "  AZURE_SUBSCRIPTION_ID: $subscriptionId"
-    Write-Host '  AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
+    Write-Host "✓ Set Actions secret AZURE_CLIENT_ID: $clientId"
+    Write-Host "✓ Set Actions secret AZURE_TENANT_ID: $tenantId"
+    Write-Host "✓ Set Actions secret AZURE_SUBSCRIPTION_ID: $subscriptionId"
+    Write-Host '✓ Set Actions secret AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
 
     Write-Host ''
     Write-Host '=== Setup Complete ==='
