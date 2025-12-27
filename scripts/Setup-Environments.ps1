@@ -87,6 +87,9 @@ Install-WingetPackage -Id "OpenJS.NodeJS" -Name "Node.js (Mermaid CLI)"
 # Mermaid CLIをインストールするためのNode.jsをインストール
 Install-WingetPackage -Id "Microsoft.AzureCLI" -Name "Azure CLI"
 
+# GitHub CLIをインストール
+Install-WingetPackage -Id "GitHub.cli" -Name "GitHub CLI"
+
 # 新規インストールされたコマンドを認識させる
 Update-Path
 
