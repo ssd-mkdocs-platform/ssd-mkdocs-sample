@@ -3,6 +3,9 @@
                 "fseventsd",
                 "mkdocs",
                 "pymdown",
-                "weasyprint"
+                "pyproject",
+                "tschoonj",
+                "weasyprint",
+                "winget"
         ]
 }
