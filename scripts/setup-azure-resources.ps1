@@ -2,17 +2,19 @@
 [CmdletBinding()]
 # スクリプトの実行パラメーター
 param(
-    [Parameter(Mandatory = $true)]
-    [string] $Owner,            # GitHubオーナー名（orgまたはuser）
+    [string] $Owner,            # GitHubオーナー名（orgまたはuser）未指定時はgit upstreamから推定
 
-    [Parameter(Mandatory = $true)]
-    [string] $Repository,       # GitHubリポジトリ名
+    [string] $Repository,       # GitHubリポジトリ名 未指定時はgit upstreamから推定
 
     [int] $PropagationDelaySeconds = 15, # AAD伝播待ち秒数
+    [int] $PropagationRetryCount = 5,    # AAD伝播待ちの最大リトライ回数
+    [switch] $Force,                         # 既存RGがある場合に削除して進む
 
     [scriptblock] $AzInvoker,   # az CLI呼び出しを差し替える場合に指定
 
-    [scriptblock] $GhInvoker    # gh CLI呼び出しを差し替える場合に指定
+    [scriptblock] $GhInvoker,   # gh CLI呼び出しを差し替える場合に指定
+
+    [scriptblock] $GitInvoker   # git 呼び出しを差し替える場合に指定
 )
 
 Set-StrictMode -Version Latest
@@ -29,6 +31,12 @@ if (-not $AzInvoker) {
 if (-not $GhInvoker) {
     $GhInvoker = {
         gh @args
+    }
+}
+
+if (-not $GitInvoker) {
+    $GitInvoker = {
+        git @args
     }
 }
 
@@ -52,7 +60,43 @@ function Invoke-GhCli {
     & $GhInvoker @args
 }
 
+function Invoke-GitCli {
+    & $GitInvoker @args
+}
+
+function Resolve-GitHubRepo {
+    param(
+        [string] $Owner,
+        [string] $Repository
+    )
+
+    if ($Owner -and $Repository) {
+        return @{ Owner = $Owner; Repository = $Repository }
+    }
+
+    $remoteUrl = Invoke-GitCli remote get-url upstream
+    if (-not $remoteUrl) {
+        throw 'Git remote "upstream" が取得できませんでした。Owner/Repository を指定してください。'
+    }
+
+    $pattern = 'github\.com[:/](?<owner>[^/]+)/(?<repo>[^/.]+)(?:\.git)?$'
+    $match = [regex]::Match($remoteUrl.Trim(), $pattern, 'IgnoreCase')
+    if (-not $match.Success) {
+        throw "upstream URL から Owner/Repository を解釈できません: $remoteUrl"
+    }
+
+    $resolvedOwner = $Owner
+    $resolvedRepo = $Repository
+    if (-not $resolvedOwner) { $resolvedOwner = $match.Groups['owner'].Value }
+    if (-not $resolvedRepo) { $resolvedRepo = $match.Groups['repo'].Value }
+
+    return @{ Owner = $resolvedOwner; Repository = $resolvedRepo }
+}
+
 # リポジトリとデプロイ先リージョンの設定
+$resolved = Resolve-GitHubRepo -Owner $Owner -Repository $Repository
+$Owner = $resolved.Owner
+$Repository = $resolved.Repository
 $githubRepo = "$Owner/$Repository"
 $location = 'japaneast'
 $swaLocation = 'eastasia'
@@ -70,8 +114,20 @@ Write-Host "Managed Identity: $identityName"
 Write-Host "GitHub Repo: $githubRepo"
 Write-Host ''
 
-# リソースグループの作成
+# リソースグループの存在確認と作成（Force時のみ削除して再作成）
 Write-Host '[1/6] Creating Resource Group...'
+$rgExistsRaw = Invoke-AzCli group exists --name $resourceGroupName
+$rgExists = $rgExistsRaw.ToString().Trim().ToLowerInvariant() -eq 'true'
+
+if ($rgExists) {
+    if (-not $Force) {
+        throw "Resource Group $resourceGroupName already exists. Specify -Force to delete and recreate."
+    }
+
+    Write-Host "  Resource Group already exists. Deleting: $resourceGroupName"
+    Invoke-AzCli group delete --name $resourceGroupName --yes --no-wait
+    Invoke-AzCli group wait --name $resourceGroupName --deleted
+}
 Invoke-AzCli group create --name $resourceGroupName --location $location -o none
 Write-Host "  Created: $resourceGroupName"
 
@@ -95,11 +151,20 @@ Write-Host '[4/6] Creating Federated Credential...'
 Invoke-AzCli identity federated-credential create --name $federatedCredentialName --identity-name $identityName --resource-group $resourceGroupName --issuer 'https://token.actions.githubusercontent.com' --subject "repo:${githubRepo}:ref:refs/heads/main" --audiences 'api://AzureADTokenExchange' -o none
 Write-Host "  Created: $federatedCredentialName"
 
-# RBAC割り当て（伝播待ち後にContributor付与）
+# RBAC割り当て（伝播完了までリトライしContributor付与）
 Write-Host '[5/6] Assigning RBAC role...'
 $swaId = Invoke-AzCli staticwebapp show --name $swaName --resource-group $resourceGroupName --query id -o tsv
-Start-Sleep -Seconds $PropagationDelaySeconds # wait for identity to propagate
-Invoke-AzCli role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role 'Contributor' --scope $swaId -o none
+for ($i = 1; $i -le $PropagationRetryCount; $i++) {
+    try {
+        Invoke-AzCli role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role 'Contributor' --scope $swaId -o none
+        break
+    } catch {
+        if ($i -eq $PropagationRetryCount) {
+            throw
+        }
+        Start-Sleep -Seconds $PropagationDelaySeconds # propagation not yet completed
+    }
+}
 Write-Host "  Assigned Contributor role to $identityName"
 
 # GitHub Actions 用シークレット登録
