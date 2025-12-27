@@ -30,7 +30,6 @@ Describe 'Setup-AzureResources.ps1' {
 
         Mock -CommandName az { throw 'az should not be called when dot-sourced' }
         Mock -CommandName gh { throw 'gh should not be called when dot-sourced' }
-        Mock -CommandName git { throw 'git should not be called when dot-sourced' }
 
         { . $scriptPath } | Should -Not -Throw
     }
@@ -49,11 +48,13 @@ Describe 'Setup-AzureResources.ps1' {
             }
         }
 
-        $gitInvoker = {
-            throw 'git should not be called when Owner/Repository are provided'
+        $ghInvoker = {
+            if (($args -join ' ') -like 'repo view*') {
+                throw 'gh should not be called when Owner/Repository are provided'
+            }
         }
 
-        { & $scriptPath -Owner $owner -Repository $repository -AzInvoker $azInvoker -GitInvoker $gitInvoker } | Should -Throw
+        { & $scriptPath -Owner $owner -Repository $repository -AzInvoker $azInvoker -GhInvoker $ghInvoker } | Should -Throw
 
         $azCallLines = $global:SetupAzCalls | ForEach-Object { $_ -join ' ' }
         $azCallLines | Should -Contain "group exists --name rg-$repository-prod"
@@ -106,13 +107,16 @@ Describe 'Setup-AzureResources.ps1' {
             $global:SetupGhCalls += ,$args
         }
 
-        $gitInvoker = {
-            throw 'git should not be called when Owner/Repository are provided'
+        $ghInvoker = {
+            $global:SetupGhCalls += ,$args
+            if (($args -join ' ') -like 'repo view*') {
+                throw 'gh repo view should not be called when Owner/Repository are provided'
+            }
         }
 
         Mock -CommandName Start-Sleep -ParameterFilter { $Seconds -eq 15 }
 
-        & $scriptPath -Owner $owner -Repository $repository -AzInvoker $azInvoker -GhInvoker $ghInvoker -GitInvoker $gitInvoker -Force
+        & $scriptPath -Owner $owner -Repository $repository -AzInvoker $azInvoker -GhInvoker $ghInvoker -Force
 
         Assert-MockCalled Start-Sleep -ParameterFilter { $Seconds -eq 15 } -Times 1
 
@@ -129,23 +133,23 @@ Describe 'Setup-AzureResources.ps1' {
         $ghCallLines | Should -Contain "secret set AZURE_CLIENT_ID --body $clientId --repo $owner/$repository"
     }
 
-    It 'Owner/Repository未指定ならgit upstreamから自動判定する' {
+    It 'gh repo viewでOwner/Repositoryを解決する' {
         $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $defaultHostname = 'example.eastasia.azurestaticapps.net'
         $clientId = 'client-123'
         $principalId = 'principal-456'
         $tenantId = 'tenant-789'
         $subscriptionId = 'sub-000'
-        $swaId = "/subscriptions/$subscriptionId/resourceGroups/rg-swa-github-role-sync-ops-prod/providers/Microsoft.Web/staticSites/stapp-swa-github-role-sync-ops-prod"
+        $swaId = "/subscriptions/$subscriptionId/resourceGroups/rg-spec-driven-docs-infra-prod/providers/Microsoft.Web/staticSites/stapp-spec-driven-docs-infra-prod"
 
         $global:SetupAzCalls = @()
         $global:SetupGhCalls = @()
         $global:RoleAssignmentAttempts = 0
-        $global:GitCalls = @()
+
+        . $scriptPath
 
         $azInvoker = {
             $global:SetupAzCalls += ,$args
-
             switch -Wildcard ($args -join ' ') {
                 'group exists*' { 'false' }
                 '*staticwebapp show*defaultHostname*' { $defaultHostname }
@@ -156,35 +160,46 @@ Describe 'Setup-AzureResources.ps1' {
                 '*account show* --query id *' { $subscriptionId }
                 'role assignment create*' {
                     $global:RoleAssignmentAttempts++
-                    if ($global:RoleAssignmentAttempts -lt 2) {
-                        throw 'AAD propagation delay'
-                    }
+                    if ($global:RoleAssignmentAttempts -lt 2) { throw 'AAD propagation delay' }
                 }
             }
         }
 
         $ghInvoker = {
             $global:SetupGhCalls += ,$args
-        }
-
-        $gitInvoker = {
-            $global:GitCalls += ,$args
-            if (($args -join ' ') -eq 'remote get-url upstream') {
-                'https://github.com/nuitsjp/swa-github-role-sync-ops.git'
+            if (($args -join ' ') -eq 'repo view --json owner,name') {
+                return '{ "name": "spec-driven-docs-infra", "owner": { "login": "nuitsjp" } }'
             }
         }
 
         Mock -CommandName Start-Sleep -ParameterFilter { $Seconds -eq 15 }
 
-        & $scriptPath -AzInvoker $azInvoker -GhInvoker $ghInvoker -GitInvoker $gitInvoker
+        Invoke-SetupAzureResources -AzInvoker $azInvoker -GhInvoker $ghInvoker
 
-        $azCallLines = $global:SetupAzCalls | ForEach-Object { $_ -join ' ' }
-        $ghCallLines = $global:SetupGhCalls | ForEach-Object { $_ -join ' ' }
+        $global:SetupAzCalls | ForEach-Object { $_ -join ' ' } | Should -Contain 'group exists --name rg-spec-driven-docs-infra-prod'
+        $global:SetupGhCalls | ForEach-Object { $_ -join ' ' } | Should -Contain 'repo view --json owner,name'
+        Assert-MockCalled Start-Sleep -ParameterFilter { $Seconds -eq 15 } -Times 1
+    }
 
-        $global:GitCalls | ForEach-Object { $_ -join ' ' } | Should -Contain 'remote get-url upstream'
-        $azCallLines | Should -Contain "group exists --name rg-swa-github-role-sync-ops-prod"
-        $azCallLines | Should -Contain "staticwebapp create --name stapp-swa-github-role-sync-ops-prod --resource-group rg-swa-github-role-sync-ops-prod --location eastasia --sku Standard -o none"
-        $ghCallLines | Should -Contain "secret set AZURE_CLIENT_ID --body $clientId --repo nuitsjp/swa-github-role-sync-ops"
+    It 'ghが失敗したら例外を投げる' {
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
+        $global:SetupAzCalls = @()
+        $global:SetupGhCalls = @()
+
+        . $scriptPath
+
+        $azInvoker = { throw 'az should not be called when gh fails' }
+
+        $ghInvoker = {
+            $global:SetupGhCalls += ,$args
+            if (($args -join ' ') -eq 'repo view --json owner,name') {
+                throw 'gh error'
+            }
+        }
+
+        { Invoke-SetupAzureResources -AzInvoker $azInvoker -GhInvoker $ghInvoker } | Should -Throw 'gh error'
+
+        $global:SetupGhCalls | ForEach-Object { $_ -join ' ' } | Should -Contain 'repo view --json owner,name'
     }
 
     It 'デフォルトinvokerでOwner/Repository指定時に実行する' {
@@ -200,7 +215,6 @@ Describe 'Setup-AzureResources.ps1' {
 
         $global:AzCalls = @()
         $global:GhCalls = @()
-        $global:GitCalls = @()
 
         function global:az {
             $global:AzCalls += ,$args
@@ -220,62 +234,19 @@ Describe 'Setup-AzureResources.ps1' {
             $global:GhCalls += ,$args
         }
 
-        function global:git {
-            $global:GitCalls += ,$args
-            if (($args -join ' ') -eq 'remote get-url upstream') {
-                "https://github.com/$global:DefaultOwner/$global:DefaultRepository.git"
-            }
-        }
-
         try {
             . $scriptPath
 
-            Invoke-SetupAzureResources
+            Invoke-SetupAzureResources -Owner $global:DefaultOwner -Repository $global:DefaultRepository
 
             $global:AzCalls | ForEach-Object { $_ -join ' ' } | Should -Contain "group exists --name rg-$($global:DefaultRepository)-prod"
             $global:GhCalls | ForEach-Object { $_ -join ' ' } | Should -Contain "secret set AZURE_CLIENT_ID --body $clientId --repo $global:DefaultOwner/$global:DefaultRepository"
-            $global:GitCalls | ForEach-Object { $_ -join ' ' } | Should -Contain 'remote get-url upstream'
         }
         finally {
             Remove-Item Function:\az -ErrorAction SilentlyContinue
             Remove-Item Function:\gh -ErrorAction SilentlyContinue
-            Remove-Item Function:\git -ErrorAction SilentlyContinue
             Remove-Variable -Name DefaultOwner -Scope Global -ErrorAction SilentlyContinue
             Remove-Variable -Name DefaultRepository -Scope Global -ErrorAction SilentlyContinue
-        }
-    }
-
-    It 'upstreamが取得できなければ例外を投げる' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
-
-        function global:git {
-            param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Args)
-            if (($Args -join ' ') -eq 'remote get-url upstream') { return $null }
-        }
-
-        try {
-            . $scriptPath
-            { Invoke-SetupAzureResources } | Should -Throw
-        }
-        finally {
-            Remove-Item Function:\git -ErrorAction SilentlyContinue
-        }
-    }
-
-    It 'upstreamのURLが不正なら例外を投げる' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
-
-        function global:git {
-            param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Args)
-            if (($Args -join ' ') -eq 'remote get-url upstream') { 'https://example.com/invalid-url' }
-        }
-
-        try {
-            . $scriptPath
-            { Invoke-SetupAzureResources } | Should -Throw
-        }
-        finally {
-            Remove-Item Function:\git -ErrorAction SilentlyContinue
         }
     }
 }

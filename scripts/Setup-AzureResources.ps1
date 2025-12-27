@@ -12,9 +12,7 @@ param(
 
     [scriptblock] $AzInvoker,   # az CLI呼び出しを差し替える場合に指定
 
-    [scriptblock] $GhInvoker,   # gh CLI呼び出しを差し替える場合に指定
-
-    [scriptblock] $GitInvoker   # git 呼び出しを差し替える場合に指定
+    [scriptblock] $GhInvoker   # gh CLI呼び出しを差し替える場合に指定
 )
 
 function Invoke-SetupAzureResources {
@@ -29,9 +27,7 @@ function Invoke-SetupAzureResources {
 
         [scriptblock] $AzInvoker,   # az CLI呼び出しを差し替える場合に指定
 
-        [scriptblock] $GhInvoker,   # gh CLI呼び出しを差し替える場合に指定
-
-        [scriptblock] $GitInvoker   # git 呼び出しを差し替える場合に指定
+        [scriptblock] $GhInvoker   # gh CLI呼び出しを差し替える場合に指定
     )
 
     Set-StrictMode -Version Latest
@@ -51,15 +47,8 @@ function Invoke-SetupAzureResources {
         }
     }
 
-    if (-not $GitInvoker) {
-        $GitInvoker = {
-            git @args
-        }
-    }
-
     $invokeAz = { & $AzInvoker @args }
     $invokeGh = { & $GhInvoker @args }
-    $invokeGit = { & $GitInvoker @args }
 
     $resolveRepo = {
         param(
@@ -71,19 +60,15 @@ function Invoke-SetupAzureResources {
             return @{ Owner = $OwnerParam; Repository = $RepositoryParam }
         }
 
-        $remoteUrl = & $invokeGit remote get-url upstream
-        if (-not $remoteUrl) {
-            throw 'Git remote "upstream" が取得できませんでした。Owner/Repository を指定してください。'
-        }
+        $ghResultRaw = & $invokeGh repo view --json 'owner,name'
+        $ghResult = $ghResultRaw | ConvertFrom-Json
 
-        $pattern = 'github\.com[:/](?<owner>[^/]+)/(?<repo>[^/.]+)(?:\.git)?$'
-        $match = [regex]::Match($remoteUrl.Trim(), $pattern, 'IgnoreCase')
-        if (-not $match.Success) {
-            throw "upstream URL から Owner/Repository を解釈できません: $remoteUrl"
-        }
+        $resolvedOwner = if ($OwnerParam) { $OwnerParam } else { $ghResult.owner.login }
+        $resolvedRepo = if ($RepositoryParam) { $RepositoryParam } else { $ghResult.name }
 
-        $resolvedOwner = if ($OwnerParam) { $OwnerParam } else { $match.Groups['owner'].Value }
-        $resolvedRepo = if ($RepositoryParam) { $RepositoryParam } else { $match.Groups['repo'].Value }
+        if (-not $resolvedOwner -or -not $resolvedRepo) {
+            throw 'gh repo view で Owner/Repository を解決できませんでした。Owner/Repository を指定してください。'
+        }
 
         return @{ Owner = $resolvedOwner; Repository = $resolvedRepo }
     }
