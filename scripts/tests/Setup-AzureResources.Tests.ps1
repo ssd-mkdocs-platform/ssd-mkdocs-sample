@@ -22,6 +22,16 @@ Describe 'Setup-AzureResources.ps1' {
         $scriptRoot = Split-Path -Path $scriptPath -Parent
     }
 
+    It 'ドットソースしても外部CLIを呼び出さない' {
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
+
+        Mock -CommandName az { throw 'az should not be called when dot-sourced' }
+        Mock -CommandName gh { throw 'gh should not be called when dot-sourced' }
+        Mock -CommandName git { throw 'git should not be called when dot-sourced' }
+
+        { . $scriptPath } | Should -Not -Throw
+    }
+
     It '指定したownerとrepositoryでAzureとGitHubの設定を呼び出す' {
         $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $owner = 'nuitsjp'
