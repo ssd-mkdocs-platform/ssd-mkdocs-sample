@@ -1,0 +1,33 @@
+name: CI Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/ci-tests.yml'
+      - 'scripts/**'
+  pull_request:
+    paths:
+      - '.github/workflows/ci-tests.yml'
+      - 'scripts/**'
+
+permissions:
+  contents: read
+
+jobs:
+  pester:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Pester -Force -Scope CurrentUser
+
+      - name: Run Pester tests
+        shell: pwsh
+        run: |
+          ./scripts/tests/Run-AllTests.ps1

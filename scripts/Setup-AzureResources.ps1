@@ -2,17 +2,13 @@
 [CmdletBinding()]
 # スクリプトの実行パラメーター
 param(
-    [string] $Owner,            # GitHubオーナー名（orgまたはuser）未指定時はgit upstreamから推定
-
-    [string] $Repository,       # GitHubリポジトリ名 未指定時はgit upstreamから推定
-
-    [int] $PropagationDelaySeconds = 15, # AAD伝播待ち秒数
-    [int] $PropagationRetryCount = 5,    # AAD伝播待ちの最大リトライ回数
-    [switch] $Force,                         # 既存RGがある場合に削除して進む
-
-    [scriptblock] $AzInvoker,   # az CLI呼び出しを差し替える場合に指定
-
-    [scriptblock] $GhInvoker   # gh CLI呼び出しを差し替える場合に指定
+    [string] $Owner,                        # GitHubオーナー名（orgまたはuser）未指定時はgit upstreamから推定
+    [string] $Repository,                   # GitHubリポジトリ名 未指定時はgit upstreamから推定
+    [int] $PropagationDelaySeconds = 15,    # AAD伝播待ち秒数
+    [int] $PropagationRetryCount = 5,       # AAD伝播待ちの最大リトライ回数
+    [switch] $Force,                        # 既存RGがある場合に削除して進む
+    [scriptblock] $AzInvoker,               # az CLI呼び出しを差し替える場合に指定
+    [scriptblock] $GhInvoker                # gh CLI呼び出しを差し替える場合に指定
 )
 
 function Invoke-SetupAzureResources {
@@ -151,14 +147,17 @@ function Invoke-SetupAzureResources {
     Write-Host '[6/6] Registering GitHub Secrets...'
     $tenantId = & $invokeAz account show --query tenantId -o tsv
     $subscriptionId = & $invokeAz account show --query id -o tsv
+    $staticWebAppsApiToken = & $invokeAz staticwebapp secrets list --name $swaName --resource-group $resourceGroupName --query properties.apiKey -o tsv
 
     & $invokeGh secret set AZURE_CLIENT_ID --body $clientId --repo $githubRepo
     & $invokeGh secret set AZURE_TENANT_ID --body $tenantId --repo $githubRepo
     & $invokeGh secret set AZURE_SUBSCRIPTION_ID --body $subscriptionId --repo $githubRepo
+    & $invokeGh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body $staticWebAppsApiToken --repo $githubRepo
 
     Write-Host "  AZURE_CLIENT_ID: $clientId"
     Write-Host "  AZURE_TENANT_ID: $tenantId"
     Write-Host "  AZURE_SUBSCRIPTION_ID: $subscriptionId"
+    Write-Host '  AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
 
     Write-Host ''
     Write-Host '=== Setup Complete ==='

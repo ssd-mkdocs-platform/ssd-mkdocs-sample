@@ -73,6 +73,7 @@ Describe 'Setup-AzureResources.ps1' {
         $principalId = 'principal-456'
         $tenantId = 'tenant-789'
         $subscriptionId = 'sub-000'
+        $apiKey = 'api-key-000'
         $swaId = "/subscriptions/$subscriptionId/resourceGroups/rg-$repository-prod/providers/Microsoft.Web/staticSites/stapp-$repository-prod"
 
         $global:SetupAzCalls = @()
@@ -92,6 +93,7 @@ Describe 'Setup-AzureResources.ps1' {
                 '*identity show*clientId*' { $clientId }
                 '*identity show*principalId*' { $principalId }
                 '*staticwebapp show* --query id *' { $swaId }
+                '*staticwebapp secrets list*' { $apiKey }
                 '*account show*tenantId*' { $tenantId }
                 '*account show* --query id *' { $subscriptionId }
                 'role assignment create*' {
@@ -131,6 +133,8 @@ Describe 'Setup-AzureResources.ps1' {
         $global:GroupDeleteAttempts | Should -Be 1
         $global:GroupWaitAttempts | Should -Be 1
         $ghCallLines | Should -Contain "secret set AZURE_CLIENT_ID --body $clientId --repo $owner/$repository"
+        $azCallLines | Should -Contain "staticwebapp secrets list --name stapp-$repository-prod --resource-group rg-$repository-prod --query properties.apiKey -o tsv"
+        $ghCallLines | Should -Contain "secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body $apiKey --repo $owner/$repository"
     }
 
     It 'gh repo viewでOwner/Repositoryを解決する' {
