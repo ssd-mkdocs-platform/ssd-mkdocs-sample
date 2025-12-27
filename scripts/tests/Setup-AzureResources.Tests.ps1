@@ -1,12 +1,12 @@
 $ErrorActionPreference = 'Stop'
 
-Describe 'setup-azure-resources.ps1' {
+Describe 'Setup-AzureResources.ps1' {
     BeforeAll {
         $start = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).ProviderPath }
         $current = (Resolve-Path $start).ProviderPath
 
         while ($true) {
-            $candidate = Join-Path -Path $current -ChildPath 'setup-azure-resources.ps1'
+            $candidate = Join-Path -Path $current -ChildPath 'Setup-AzureResources.ps1'
             if (Test-Path $candidate) {
                 $scriptPath = (Resolve-Path $candidate).ProviderPath
                 break
@@ -14,7 +14,7 @@ Describe 'setup-azure-resources.ps1' {
 
             $parent = Split-Path -Path $current -Parent
             if (-not $parent -or $parent -eq $current) {
-                throw 'setup-azure-resources.ps1 のパスを解決できません。'
+                throw 'Setup-AzureResources.ps1 のパスを解決できません。'
             }
             $current = $parent
         }
@@ -23,7 +23,7 @@ Describe 'setup-azure-resources.ps1' {
     }
 
     It '指定したownerとrepositoryでAzureとGitHubの設定を呼び出す' {
-        $scriptPath = Join-Path $scriptRoot 'setup-azure-resources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $owner = 'nuitsjp'
         $repository = 'swa-github-role-sync-ops'
         $defaultHostname = 'example.eastasia.azurestaticapps.net'
@@ -92,7 +92,7 @@ Describe 'setup-azure-resources.ps1' {
     }
 
     It '既存リソースグループがある場合はForceなしならエラーで止まる' {
-        $scriptPath = Join-Path $scriptRoot 'setup-azure-resources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $owner = 'nuitsjp'
         $repository = 'swa-github-role-sync-ops'
 
@@ -118,7 +118,7 @@ Describe 'setup-azure-resources.ps1' {
     }
 
     It '既存リソースグループがある場合はForce指定で削除してから作成する' {
-        $scriptPath = Join-Path $scriptRoot 'setup-azure-resources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $owner = 'nuitsjp'
         $repository = 'swa-github-role-sync-ops'
         $defaultHostname = 'example.eastasia.azurestaticapps.net'
@@ -184,7 +184,7 @@ Describe 'setup-azure-resources.ps1' {
     }
 
     It 'Owner/Repository未指定ならgit upstreamから自動判定する' {
-        $scriptPath = Join-Path $scriptRoot 'setup-azure-resources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $defaultHostname = 'example.eastasia.azurestaticapps.net'
         $clientId = 'client-123'
         $principalId = 'principal-456'
