@@ -43,3 +43,4 @@ plugins:
       toc_title: 目次
       toc_level: 3
       output_path: pdf/ドキュメンテーション戦略.pdf
+      enabled_if_env: MKDOCS_PDF
