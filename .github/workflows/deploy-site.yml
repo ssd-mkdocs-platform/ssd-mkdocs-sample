@@ -4,8 +4,18 @@ on:
   push:
     branches: [main]
     paths:
-      - 'site'
-      - 'site/**'
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/deploy-site.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
 
@@ -14,11 +24,47 @@ permissions:
 
 jobs:
   deploy:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.13"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Mermaid CLI
+        run: npm install -g @mermaid-js/mermaid-cli
+
+      - name: Sync dependencies
+        run: uv sync --frozen
+
+      - name: Install Playwright browsers
+        run: uv run python -m playwright install chromium
+
+      - name: Install PDF dependencies
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 libffi-dev
+
+      - name: Build site (PDF enabled)
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          MKDOCS_PDF: "1"
+        run: uv run mkdocs build
+
+      - name: Build site
+        if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+        run: uv run mkdocs build
 
       - name: Deploy static site
         uses: Azure/static-web-apps-deploy@v1
