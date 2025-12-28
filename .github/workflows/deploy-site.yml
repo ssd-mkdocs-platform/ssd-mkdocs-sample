@@ -45,7 +45,7 @@ jobs:
         run: npm install -g @mermaid-js/mermaid-cli
 
       - name: Sync dependencies
-        run: uv sync --frozen
+        run: uv sync
 
       - name: Install Playwright browsers
         run: uv run python -m playwright install chromium
