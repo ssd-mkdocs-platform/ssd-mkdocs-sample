@@ -1,3 +1,6 @@
+# Claude Code
+.claude/settings.local.json
+
 # User-specific ignores
 uv.lock
 sitecustomize.py
