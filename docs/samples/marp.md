@@ -162,7 +162,7 @@ graph LR
 
 ## VS Code拡張
 
-Marp for VS Code拡張を使用すると、エディタ内でプレビューを確認できます。
+Marp for VS Code拡張を使用すると、エディター内でプレビューを確認できます。
 
 1. VS Codeを開く
 2. 拡張機能で「Marp for VS Code」を検索
