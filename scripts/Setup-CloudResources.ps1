@@ -100,7 +100,7 @@ function Invoke-SetupAzureResources {
     Write-Host ''
 
     # リソースグループの存在確認と作成
-    Write-Host '[1/6] Checking Resource Group...'
+    Write-Host '[1/7] Checking Resource Group...'
     $rgExistsRaw = & $invokeAz group exists --name $resourceGroupName
     $rgExists = $rgExistsRaw.ToString().Trim().ToLowerInvariant() -eq 'true'
 
@@ -120,7 +120,7 @@ function Invoke-SetupAzureResources {
     }
 
     # Static Web Apps の作成とホスト名取得
-    Write-Host '[2/6] Checking Static Web App...'
+    Write-Host '[2/7] Checking Static Web App...'
     $defaultHostname = $null
     try {
         $defaultHostname = & $invokeAz staticwebapp show --name $swaName --resource-group $resourceGroupName --query defaultHostname -o tsv 2>$null
@@ -139,7 +139,7 @@ function Invoke-SetupAzureResources {
     }
 
     # マネージドID作成とID情報の取得
-    Write-Host '[3/6] Checking Managed Identity...'
+    Write-Host '[3/7] Checking Managed Identity...'
     $clientId = $null
     try {
         $clientId = & $invokeAz identity show --name $identityName --resource-group $resourceGroupName --query clientId -o tsv 2>$null
@@ -160,7 +160,7 @@ function Invoke-SetupAzureResources {
     }
 
     # OIDCフェデレーション資格情報の作成
-    Write-Host '[4/6] Checking Federated Credential...'
+    Write-Host '[4/7] Checking Federated Credential...'
     $fcExists = $false
     try {
         & $invokeAz identity federated-credential show --name $federatedCredentialName --identity-name $identityName --resource-group $resourceGroupName -o none 2>$null
@@ -177,7 +177,7 @@ function Invoke-SetupAzureResources {
     }
 
     # RBAC割り当て（伝播完了までリトライしContributor付与）
-    Write-Host '[5/6] Checking RBAC role assignment...'
+    Write-Host '[5/7] Checking RBAC role assignment...'
     $swaId = & $invokeAz staticwebapp show --name $swaName --resource-group $resourceGroupName --query id -o tsv
 
     # 既存のロール割り当てを確認
@@ -208,8 +208,54 @@ function Invoke-SetupAzureResources {
         Write-Host "  Assigned Contributor role to $identityName"
     }
 
+    # GitHub Discussions 設定
+    Write-Host '[6/7] Checking GitHub Discussions...'
+    & $invokeGh repo edit $githubRepo --enable-discussions
+    Write-Host "  Enabled Discussions for $githubRepo"
+
+    # カテゴリー存在確認用の関数
+    $checkCategory = {
+        $categoryQuery = "query { repository(owner: `"$Owner`", name: `"$Repository`") { discussionCategory(slug: `"invitation`") { id } } }"
+        try {
+            $result = & $invokeGh api graphql -f "query=$categoryQuery" 2>&1 | ConvertFrom-Json
+            return $null -ne $result.data.repository.discussionCategory
+        } catch {
+            return $false
+        }
+    }
+
+    # 既に存在すればスキップ
+    if (& $checkCategory) {
+        Write-Host '  Invitation category already exists (skipped)'
+    } else {
+        # 存在しない場合はループで案内
+        while ($true) {
+            Write-Host ''
+            Write-Host '=== GitHub Discussions Setup ==='
+            Write-Host 'Discussionカテゴリー "Invitation" を作成してください。'
+            Write-Host ''
+            Write-Host '手順:'
+            Write-Host '1. GitHub → Settings → Discussions'
+            Write-Host '2. Set up discussions をクリック（初回のみ）'
+            Write-Host '3. Categories → New category をクリック'
+            Write-Host '4. Name: Invitation'
+            Write-Host '5. Description: SWA role sync invitations'
+            Write-Host '6. Discussion Format: Announcement'
+            Write-Host '7. Create category をクリック'
+            Write-Host ''
+            $null = & $invokeReadHost 'カテゴリー作成後、Enterを押してください'
+
+            # 再確認
+            if (& $checkCategory) {
+                Write-Host '  ✓ Invitation category verified'
+                break
+            }
+            Write-Host '  Invitationカテゴリーが見つかりません。再度作成してください。'
+        }
+    }
+
     # GitHub Actions 用シークレット登録
-    Write-Host '[6/6] Checking GitHub Secrets...'
+    Write-Host '[7/7] Checking GitHub Secrets...'
 
     # 既存シークレットのチェック
     $existingSecretsJson = & $invokeGh secret list --repo $githubRepo --json name
@@ -222,7 +268,7 @@ function Invoke-SetupAzureResources {
     }
 
     # 必要なシークレット一覧
-    $requiredSecrets = @('AZURE_CLIENT_ID', 'AZURE_TENANT_ID', 'AZURE_SUBSCRIPTION_ID', 'AZURE_STATIC_WEB_APPS_API_TOKEN', 'ROLE_SYNC_APP_ID', 'ROLE_SYNC_APP_PRIVATE_KEY')
+    $requiredSecrets = @('AZURE_CLIENT_ID', 'AZURE_TENANT_ID', 'AZURE_SUBSCRIPTION_ID', 'AZURE_STATIC_WEB_APPS_API_TOKEN', 'AZURE_SWA_NAME', 'AZURE_SWA_RESOURCE_GROUP', 'ROLE_SYNC_APP_ID', 'ROLE_SYNC_APP_PRIVATE_KEY')
     $allSecretsExist = $true
     foreach ($secret in $requiredSecrets) {
         if ($secret -notin $existingSecrets) {
@@ -246,11 +292,15 @@ function Invoke-SetupAzureResources {
         & $invokeGh secret set AZURE_TENANT_ID --body $tenantId --repo $githubRepo | Out-Null
         & $invokeGh secret set AZURE_SUBSCRIPTION_ID --body $subscriptionId --repo $githubRepo | Out-Null
         & $invokeGh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body $staticWebAppsApiToken --repo $githubRepo | Out-Null
+        & $invokeGh secret set AZURE_SWA_NAME --body $swaName --repo $githubRepo | Out-Null
+        & $invokeGh secret set AZURE_SWA_RESOURCE_GROUP --body $resourceGroupName --repo $githubRepo | Out-Null
 
         Write-Host "  ✓ Set Actions secret AZURE_CLIENT_ID: $clientId"
         Write-Host "  ✓ Set Actions secret AZURE_TENANT_ID: $tenantId"
         Write-Host "  ✓ Set Actions secret AZURE_SUBSCRIPTION_ID: $subscriptionId"
         Write-Host '  ✓ Set Actions secret AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
+        Write-Host "  ✓ Set Actions secret AZURE_SWA_NAME: $swaName"
+        Write-Host "  ✓ Set Actions secret AZURE_SWA_RESOURCE_GROUP: $resourceGroupName"
 
         # GitHub Apps 関連シークレットの対話入力
         Write-Host ''
