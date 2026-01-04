@@ -1,7 +1,7 @@
 ---
 name: starting-issues
 description: Issue作業を開始し、ブランチを作成してPlanモードに入る。Use when the user wants to start working on an issue (Issue対応開始), begin a task (タスク開始), or tackle a GitHub issue (課題着手).
-allowed-tools: Bash(gh issue:*), Bash(git checkout:*), Bash(git pull:*), Bash(git branch:*), Bash(git stash:*), Bash(git rev-parse:*), Bash(git show-ref:*), Bash(git worktree:*), Bash(mkdir:*), Bash(cd:*), AskUserQuestion, EnterPlanMode, WebSearch, WebFetch, Skill
+allowed-tools: Bash(gh issue:*), Bash(git checkout:*), Bash(git pull:*), Bash(git branch:*), Bash(git stash:*), Bash(git rev-parse:*), Bash(git show-ref:*), Bash(git worktree:*), Bash(mkdir:*), Bash(cd:*), Bash(pwsh:*), Bash(bash:*), AskUserQuestion, EnterPlanMode, WebSearch, WebFetch, Skill
 ---
 
 # Issue作業開始
@@ -37,57 +37,35 @@ gh issue view {番号}
 
 ### 3. 作業環境の準備
 
-以下の手順でworktreeを作成し、作業ディレクトリへ移動する。
+worktreeを作成（または既存worktreeを検出）し、作業ディレクトリへ移動する。
 
-#### 3.1 パスの決定
+#### 3.1 スクリプトでworktreeを作成
 
-```bash
-# リポジトリルートを取得
-repoRoot=$(git rev-parse --show-toplevel)
-repoName=$(basename "$repoRoot")
-worktreesRoot="$(dirname "$repoRoot")/${repoName}-worktrees"
-branchName="fix-issue-{番号}"
-worktreePath="${worktreesRoot}/${branchName}"
+**Windows環境（pwsh）**:
+```powershell
+$worktreePath = pwsh -File .claude/skills/starting-issues/scripts/Setup-Worktree.ps1 -Issue {番号}
 ```
 
-- **worktrees用ディレクトリ**: `[リポジトリ親ディレクトリ]/[リポジトリ名]-worktrees/`
-- **worktreeパス**: `[worktrees用ディレクトリ]/fix-issue-{番号}`
-- **ブランチ名**: `fix-issue-{番号}`
+**Linux/macOS環境（bash）**:
+```bash
+worktreePath=$(bash .claude/skills/starting-issues/scripts/setup-worktree.sh {番号})
+```
 
-#### 3.2 既存worktreeの確認
+スクリプトは以下を行う:
+- リポジトリルートを取得
+- worktrees用ディレクトリ `[リポジトリ名]-worktrees/` を作成（存在しない場合）
+- ブランチ `fix-issue-{番号}` の存在を確認
+- worktreeが既に存在すればそのパスを返す
+- 存在しなければ新規作成してパスを返す
 
-`git worktree list` で対象のworktreeが既に存在するか確認。
-- **存在する場合**: そのディレクトリへ移動して次のステップへ
-- **存在しない場合**: 3.3へ進む
+**作成されるパス**:
+- worktrees用ディレクトリ: `[リポジトリ親ディレクトリ]/[リポジトリ名]-worktrees/`
+- worktreeパス: `[worktrees用ディレクトリ]/fix-issue-{番号}`
+- ブランチ名: `fix-issue-{番号}`
 
-#### 3.3 worktreeの作成
+#### 3.2 作業ディレクトリへ移動
 
-1. worktrees用ディレクトリが存在しない場合は作成:
-   ```bash
-   mkdir -p "${worktreesRoot}"
-   ```
-
-2. ブランチの存在確認:
-   ```bash
-   # ローカルブランチの確認
-   git show-ref --verify --quiet "refs/heads/${branchName}"
-
-   # リモートブランチの確認（ローカルがない場合）
-   git show-ref --verify --quiet "refs/remotes/origin/${branchName}"
-   ```
-
-3. worktreeの作成:
-   - **ローカルブランチがある場合**:
-     ```bash
-     git worktree add "${worktreePath}" "${branchName}"
-     ```
-   - **ローカルブランチがない場合**:
-     - リモートブランチがあれば起点として使用、なければHEADを起点に
-     ```bash
-     git worktree add -b "${branchName}" "${worktreePath}" "${startPoint}"
-     ```
-
-#### 3.4 作業ディレクトリへ移動
+スクリプトが出力したパスに移動する:
 
 ```bash
 cd "${worktreePath}"
