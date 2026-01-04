@@ -135,6 +135,30 @@ function Install-PlaywrightBrowsers {
     & $script:UvInvoker 'run' 'python' '-m' 'playwright' 'install'
 }
 
+function Install-NpmLocalPackages {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ProjectRoot
+    )
+
+    $packageJsonPath = Join-Path $ProjectRoot "package.json"
+    $nodeModulesPath = Join-Path $ProjectRoot "node_modules"
+
+    if (-not (& $script:TestPathInvoker -Path $packageJsonPath -PathType Leaf -ErrorAction SilentlyContinue)) {
+        Write-Host "package.jsonが見つからないため、npm installをスキップします。" -ForegroundColor Yellow
+        return
+    }
+
+    if (& $script:TestPathInvoker -Path $nodeModulesPath -PathType Container -ErrorAction SilentlyContinue) {
+        Write-Host "node_modulesは既に存在するため、npm installをスキップします。" -ForegroundColor Green
+        return
+    }
+
+    Write-Host "npm installを実行してローカルパッケージをインストールしています..." -ForegroundColor Yellow
+    & $script:NpmInvoker 'install'
+    Write-Host "npm installが完了しました。" -ForegroundColor Green
+}
+
 function Invoke-SetupEnvironments {
     [CmdletBinding()]
     param(
@@ -190,6 +214,9 @@ function Invoke-SetupEnvironments {
 
         # Playwrightブラウザのインストール
         Install-PlaywrightBrowsers
+
+        # textlint等のnpmローカルパッケージのインストール
+        Install-NpmLocalPackages -ProjectRoot $resolvedProjectRoot
     }
     finally {
         $previousPath = if ($previousLocation -is [string]) { $previousLocation } else { $previousLocation.ProviderPath }
