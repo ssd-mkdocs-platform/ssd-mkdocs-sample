@@ -8,7 +8,8 @@ param(
     [int] $PropagationRetryCount = 5,       # AAD伝播待ちの最大リトライ回数
     [switch] $Force,                        # 既存RGがある場合に削除して進む
     [scriptblock] $AzInvoker,               # az CLI呼び出しを差し替える場合に指定
-    [scriptblock] $GhInvoker                # gh CLI呼び出しを差し替える場合に指定
+    [scriptblock] $GhInvoker,               # gh CLI呼び出しを差し替える場合に指定
+    [scriptblock] $ReadHostInvoker          # Read-Host呼び出しを差し替える場合に指定
 )
 
 function Invoke-SetupAzureResources {
@@ -21,9 +22,9 @@ function Invoke-SetupAzureResources {
         [int] $PropagationRetryCount = 5,    # AAD伝播待ちの最大リトライ回数
         [switch] $Force,                     # 既存RGがある場合に削除して進む
 
-        [scriptblock] $AzInvoker,   # az CLI呼び出しを差し替える場合に指定
-
-        [scriptblock] $GhInvoker   # gh CLI呼び出しを差し替える場合に指定
+        [scriptblock] $AzInvoker,       # az CLI呼び出しを差し替える場合に指定
+        [scriptblock] $GhInvoker,       # gh CLI呼び出しを差し替える場合に指定
+        [scriptblock] $ReadHostInvoker  # Read-Host呼び出しを差し替える場合に指定
     )
 
     Set-StrictMode -Version Latest
@@ -43,8 +44,16 @@ function Invoke-SetupAzureResources {
         }
     }
 
+    if (-not $ReadHostInvoker) {
+        $ReadHostInvoker = {
+            param([string] $Prompt)
+            Read-Host -Prompt $Prompt
+        }
+    }
+
     $invokeAz = { & $AzInvoker @args }
     $invokeGh = { & $GhInvoker @args }
+    $invokeReadHost = { param([string] $Prompt) & $ReadHostInvoker $Prompt }
 
     $resolveRepo = {
         param(
@@ -90,74 +99,185 @@ function Invoke-SetupAzureResources {
     Write-Host "GitHub Repo: $githubRepo"
     Write-Host ''
 
-    # リソースグループの存在確認と作成（Force時のみ削除して再作成）
-    Write-Host '[1/6] Creating Resource Group...'
+    # リソースグループの存在確認と作成
+    Write-Host '[1/6] Checking Resource Group...'
     $rgExistsRaw = & $invokeAz group exists --name $resourceGroupName
     $rgExists = $rgExistsRaw.ToString().Trim().ToLowerInvariant() -eq 'true'
 
     if ($rgExists) {
-        if (-not $Force) {
-            throw "Resource Group $resourceGroupName already exists. Specify -Force to delete and recreate."
+        if ($Force) {
+            Write-Host "  Resource Group already exists. Deleting: $resourceGroupName"
+            & $invokeAz group delete --name $resourceGroupName --yes --no-wait
+            & $invokeAz group wait --name $resourceGroupName --deleted
+            & $invokeAz group create --name $resourceGroupName --location $location -o none
+            Write-Host "  Created: $resourceGroupName"
+        } else {
+            Write-Host "  Already exists: $resourceGroupName (skipped)"
         }
-
-        Write-Host "  Resource Group already exists. Deleting: $resourceGroupName"
-        & $invokeAz group delete --name $resourceGroupName --yes --no-wait
-        & $invokeAz group wait --name $resourceGroupName --deleted
+    } else {
+        & $invokeAz group create --name $resourceGroupName --location $location -o none
+        Write-Host "  Created: $resourceGroupName"
     }
-    & $invokeAz group create --name $resourceGroupName --location $location -o none
-    Write-Host "  Created: $resourceGroupName"
 
     # Static Web Apps の作成とホスト名取得
-    Write-Host '[2/6] Creating Static Web App...'
-    & $invokeAz staticwebapp create --name $swaName --resource-group $resourceGroupName --location $swaLocation --sku Standard -o none
-    $defaultHostname = & $invokeAz staticwebapp show --name $swaName --resource-group $resourceGroupName --query defaultHostname -o tsv
-    Write-Host "  Created: $swaName"
-    Write-Host "  Hostname: $defaultHostname"
+    Write-Host '[2/6] Checking Static Web App...'
+    $defaultHostname = $null
+    try {
+        $defaultHostname = & $invokeAz staticwebapp show --name $swaName --resource-group $resourceGroupName --query defaultHostname -o tsv 2>$null
+    } catch {
+        # SWAが存在しない
+    }
+
+    if ($defaultHostname) {
+        Write-Host "  Already exists: $swaName (skipped)"
+        Write-Host "  Hostname: $defaultHostname"
+    } else {
+        & $invokeAz staticwebapp create --name $swaName --resource-group $resourceGroupName --location $swaLocation --sku Standard -o none
+        $defaultHostname = & $invokeAz staticwebapp show --name $swaName --resource-group $resourceGroupName --query defaultHostname -o tsv
+        Write-Host "  Created: $swaName"
+        Write-Host "  Hostname: $defaultHostname"
+    }
 
     # マネージドID作成とID情報の取得
-    Write-Host '[3/6] Creating Managed Identity...'
-    & $invokeAz identity create --name $identityName --resource-group $resourceGroupName --location $location -o none
-    $clientId = & $invokeAz identity show --name $identityName --resource-group $resourceGroupName --query clientId -o tsv
-    $principalId = & $invokeAz identity show --name $identityName --resource-group $resourceGroupName --query principalId -o tsv
-    Write-Host "  Created: $identityName"
-    Write-Host "  Client ID: $clientId"
+    Write-Host '[3/6] Checking Managed Identity...'
+    $clientId = $null
+    try {
+        $clientId = & $invokeAz identity show --name $identityName --resource-group $resourceGroupName --query clientId -o tsv 2>$null
+    } catch {
+        # Identityが存在しない
+    }
+
+    if ($clientId) {
+        $principalId = & $invokeAz identity show --name $identityName --resource-group $resourceGroupName --query principalId -o tsv
+        Write-Host "  Already exists: $identityName (skipped)"
+        Write-Host "  Client ID: $clientId"
+    } else {
+        & $invokeAz identity create --name $identityName --resource-group $resourceGroupName --location $location -o none
+        $clientId = & $invokeAz identity show --name $identityName --resource-group $resourceGroupName --query clientId -o tsv
+        $principalId = & $invokeAz identity show --name $identityName --resource-group $resourceGroupName --query principalId -o tsv
+        Write-Host "  Created: $identityName"
+        Write-Host "  Client ID: $clientId"
+    }
 
     # OIDCフェデレーション資格情報の作成
-    Write-Host '[4/6] Creating Federated Credential...'
-    & $invokeAz identity federated-credential create --name $federatedCredentialName --identity-name $identityName --resource-group $resourceGroupName --issuer 'https://token.actions.githubusercontent.com' --subject "repo:${githubRepo}:ref:refs/heads/main" --audiences 'api://AzureADTokenExchange' -o none
-    Write-Host "  Created: $federatedCredentialName"
+    Write-Host '[4/6] Checking Federated Credential...'
+    $fcExists = $false
+    try {
+        & $invokeAz identity federated-credential show --name $federatedCredentialName --identity-name $identityName --resource-group $resourceGroupName -o none 2>$null
+        $fcExists = $true
+    } catch {
+        # Credentialが存在しない
+    }
+
+    if ($fcExists) {
+        Write-Host "  Already exists: $federatedCredentialName (skipped)"
+    } else {
+        & $invokeAz identity federated-credential create --name $federatedCredentialName --identity-name $identityName --resource-group $resourceGroupName --issuer 'https://token.actions.githubusercontent.com' --subject "repo:${githubRepo}:ref:refs/heads/main" --audiences 'api://AzureADTokenExchange' -o none
+        Write-Host "  Created: $federatedCredentialName"
+    }
 
     # RBAC割り当て（伝播完了までリトライしContributor付与）
-    Write-Host '[5/6] Assigning RBAC role...'
+    Write-Host '[5/6] Checking RBAC role assignment...'
     $swaId = & $invokeAz staticwebapp show --name $swaName --resource-group $resourceGroupName --query id -o tsv
-    for ($i = 1; $i -le $PropagationRetryCount; $i++) {
-        try {
-            & $invokeAz role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role 'Contributor' --scope $swaId -o none
-            break
-        } catch {
-            if ($i -eq $PropagationRetryCount) {
-                throw
-            }
-            Start-Sleep -Seconds $PropagationDelaySeconds # propagation not yet completed
+
+    # 既存のロール割り当てを確認
+    $roleAssignmentExists = $false
+    try {
+        $assignments = & $invokeAz role assignment list --assignee $principalId --scope $swaId --role 'Contributor' -o json 2>$null
+        if ($assignments -and ($assignments | ConvertFrom-Json).Count -gt 0) {
+            $roleAssignmentExists = $true
         }
+    } catch {
+        # 割り当てが存在しない
     }
-    Write-Host "  Assigned Contributor role to $identityName"
+
+    if ($roleAssignmentExists) {
+        Write-Host "  Already assigned: Contributor role to $identityName (skipped)"
+    } else {
+        for ($i = 1; $i -le $PropagationRetryCount; $i++) {
+            try {
+                & $invokeAz role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role 'Contributor' --scope $swaId -o none
+                break
+            } catch {
+                if ($i -eq $PropagationRetryCount) {
+                    throw
+                }
+                Start-Sleep -Seconds $PropagationDelaySeconds # propagation not yet completed
+            }
+        }
+        Write-Host "  Assigned Contributor role to $identityName"
+    }
 
     # GitHub Actions 用シークレット登録
-    Write-Host '[6/6] Registering GitHub Secrets...'
-    $tenantId = & $invokeAz account show --query tenantId -o tsv
-    $subscriptionId = & $invokeAz account show --query id -o tsv
-    $staticWebAppsApiToken = & $invokeAz staticwebapp secrets list --name $swaName --resource-group $resourceGroupName --query properties.apiKey -o tsv
+    Write-Host '[6/6] Checking GitHub Secrets...'
 
-    & $invokeGh secret set AZURE_CLIENT_ID --body $clientId --repo $githubRepo | Out-Null
-    & $invokeGh secret set AZURE_TENANT_ID --body $tenantId --repo $githubRepo | Out-Null
-    & $invokeGh secret set AZURE_SUBSCRIPTION_ID --body $subscriptionId --repo $githubRepo | Out-Null
-    & $invokeGh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body $staticWebAppsApiToken --repo $githubRepo | Out-Null
+    # 既存シークレットのチェック
+    $existingSecretsJson = & $invokeGh secret list --repo $githubRepo --json name
+    $existingSecrets = @()
+    if ($existingSecretsJson) {
+        $parsed = $existingSecretsJson | ConvertFrom-Json
+        if ($parsed) {
+            $existingSecrets = @($parsed | ForEach-Object { $_.name })
+        }
+    }
 
-    Write-Host "✓ Set Actions secret AZURE_CLIENT_ID: $clientId"
-    Write-Host "✓ Set Actions secret AZURE_TENANT_ID: $tenantId"
-    Write-Host "✓ Set Actions secret AZURE_SUBSCRIPTION_ID: $subscriptionId"
-    Write-Host '✓ Set Actions secret AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
+    # 必要なシークレット一覧
+    $requiredSecrets = @('AZURE_CLIENT_ID', 'AZURE_TENANT_ID', 'AZURE_SUBSCRIPTION_ID', 'AZURE_STATIC_WEB_APPS_API_TOKEN', 'ROLE_SYNC_APP_ID', 'ROLE_SYNC_APP_PRIVATE_KEY')
+    $allSecretsExist = $true
+    foreach ($secret in $requiredSecrets) {
+        if ($secret -notin $existingSecrets) {
+            $allSecretsExist = $false
+            break
+        }
+    }
+
+    if ($allSecretsExist -and -not $Force) {
+        Write-Host "  All secrets already exist (skipped)"
+    } else {
+        if ($Force -and $existingSecrets.Count -gt 0) {
+            Write-Host "  Overwriting existing secrets with -Force..."
+        }
+
+        $tenantId = & $invokeAz account show --query tenantId -o tsv
+        $subscriptionId = & $invokeAz account show --query id -o tsv
+        $staticWebAppsApiToken = & $invokeAz staticwebapp secrets list --name $swaName --resource-group $resourceGroupName --query properties.apiKey -o tsv
+
+        & $invokeGh secret set AZURE_CLIENT_ID --body $clientId --repo $githubRepo | Out-Null
+        & $invokeGh secret set AZURE_TENANT_ID --body $tenantId --repo $githubRepo | Out-Null
+        & $invokeGh secret set AZURE_SUBSCRIPTION_ID --body $subscriptionId --repo $githubRepo | Out-Null
+        & $invokeGh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body $staticWebAppsApiToken --repo $githubRepo | Out-Null
+
+        Write-Host "  ✓ Set Actions secret AZURE_CLIENT_ID: $clientId"
+        Write-Host "  ✓ Set Actions secret AZURE_TENANT_ID: $tenantId"
+        Write-Host "  ✓ Set Actions secret AZURE_SUBSCRIPTION_ID: $subscriptionId"
+        Write-Host '  ✓ Set Actions secret AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
+
+        # GitHub Apps 関連シークレットの対話入力
+        Write-Host ''
+        Write-Host '=== GitHub App Setup ==='
+        Write-Host 'GitHub Appを作成し、以下の情報を入力してください。'
+        Write-Host ''
+        Write-Host '手順:'
+        Write-Host '1. GitHub → Settings → Developer settings → GitHub Apps → New GitHub App'
+        Write-Host '2. App name: 任意（例: role-sync-app）'
+        Write-Host '3. Homepage URL: リポジトリのURL'
+        Write-Host '4. Webhook: Active のチェックを外す'
+        Write-Host '5. Permissions → Repository → Discussions: Read and write'
+        Write-Host '6. Create GitHub App をクリック'
+        Write-Host '7. 作成後、App ID をコピー'
+        Write-Host '8. Private keys → Generate a private key でPEMファイルをダウンロード'
+        Write-Host ''
+
+        $appId = & $invokeReadHost 'GitHub App ID を入力してください'
+        $privateKeyPath = & $invokeReadHost 'Private Key ファイルのパスを入力してください'
+        $privateKey = Get-Content -Path $privateKeyPath -Raw
+
+        & $invokeGh secret set ROLE_SYNC_APP_ID --body $appId --repo $githubRepo | Out-Null
+        & $invokeGh secret set ROLE_SYNC_APP_PRIVATE_KEY --body $privateKey --repo $githubRepo | Out-Null
+
+        Write-Host "  ✓ Set Actions secret ROLE_SYNC_APP_ID: $appId"
+        Write-Host '  ✓ Set Actions secret ROLE_SYNC_APP_PRIVATE_KEY: (redacted)'
+    }
 
     Write-Host ''
     Write-Host '=== Setup Complete ==='
