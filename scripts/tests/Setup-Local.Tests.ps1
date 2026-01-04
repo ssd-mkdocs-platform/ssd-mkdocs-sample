@@ -1,12 +1,12 @@
 $ErrorActionPreference = 'Stop'
 
-Describe 'Setup-Environments.ps1' {
+Describe 'Setup-Local.ps1' {
     BeforeAll {
         $start = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).ProviderPath }
         $current = (Resolve-Path $start).ProviderPath
 
         while ($true) {
-            $candidate = Join-Path -Path $current -ChildPath 'Setup-Environments.ps1'
+            $candidate = Join-Path -Path $current -ChildPath 'Setup-Local.ps1'
             if (Test-Path $candidate) {
                 $scriptPath = (Resolve-Path $candidate).ProviderPath
                 break
@@ -14,7 +14,7 @@ Describe 'Setup-Environments.ps1' {
 
             $parent = Split-Path -Path $current -Parent
             if (-not $parent -or $parent -eq $current) {
-                throw 'Setup-Environments.ps1 のパスを解決できません。'
+                throw 'Setup-Local.ps1 のパスを解決できません。'
             }
             $current = $parent
         }
