@@ -1,18 +1,16 @@
 {
   "rules": {
     "preset-japanese": {
+      "sentence-length": {
+        "max": 150
+      },
       "no-doubled-joshi": {
         "allow": ["も", "や", "か"]
       }
     },
     "preset-ja-spacing": {
-      "ja-space-between-half-and-full-width": {
-        "space": "never"
-      },
-      "ja-space-around-code": {
-        "before": true,
-        "after": true
-      }
+      "ja-space-between-half-and-full-width": false,
+      "ja-space-around-code": false
     }
   }
 }
