@@ -11,8 +11,8 @@ permissions:
   discussions: write
 
 env:
-  SWA_NAME: stapp-swa-github-role-sync-ops-prod
-  SWA_RG: rg-swa-github-role-sync-ops-prod
+  SWA_NAME: ${{ secrets.AZURE_SWA_NAME }}
+  SWA_RG: ${{ secrets.AZURE_SWA_RESOURCE_GROUP }}
   DISCUSSION_CATEGORY: Invitation
 
 jobs:

@@ -77,7 +77,7 @@ Describe 'Setup-CloudResources.ps1' {
                 return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
             }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
@@ -451,7 +451,7 @@ Describe 'Setup-CloudResources.ps1' {
                 return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
             }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
@@ -504,7 +504,7 @@ Describe 'Setup-CloudResources.ps1' {
                 return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
             }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
@@ -567,7 +567,7 @@ Describe 'Setup-CloudResources.ps1' {
                 return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
             }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
