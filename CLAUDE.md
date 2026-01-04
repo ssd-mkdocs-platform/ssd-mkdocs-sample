@@ -30,7 +30,7 @@ MKDOCS_PDF=1 uv run mkdocs build
 ./scripts/tests/Run-AllTests.ps1
 
 # Run a single test file
-Invoke-Pester -Path ./scripts/tests/Setup-Local.Tests.ps1
+Invoke-Pester -Path ./scripts/tests/Setup-Environments.Tests.ps1
 ```
 
 Tests use Pester. Production scripts live in `scripts/`, test files in `scripts/tests/` with `*.Tests.ps1` naming.
@@ -39,8 +39,19 @@ Tests use Pester. Production scripts live in `scripts/`, test files in `scripts/
 
 - `docs/` — Markdown source for MkDocs site; add `index.md` per section
 - `mkdocs.yml` — Site config, navigation, plugins; update when adding pages
-- `scripts/` — PowerShell helper scripts (e.g., `Setup-Local.ps1` for tooling bootstrap)
+- `scripts/` — PowerShell helper scripts (e.g., `Setup-Environments.ps1` for tooling bootstrap)
 - `pyproject.toml`, `uv.lock` — Python dependencies managed by uv
+- `.claude/skills/` — Agent Skills for Claude Code
+
+## Agent Skills
+
+Project-specific Agent Skills are defined in `.claude/skills/`. Claude automatically uses these based on context.
+
+| Skill | Description |
+|-------|-------------|
+| `creating-issues` | Create GitHub Issues interactively |
+| `creating-prs` | Analyze diff from main branch and create PR |
+| `starting-issues` | Start issue work (create branch → Plan mode) |
 
 ## Tech Stack
 
@@ -67,6 +78,6 @@ Tests use Pester. Production scripts live in `scripts/`, test files in `scripts/
 
 Run as administrator:
 ```powershell
-.\scripts\Setup-Local.ps1
+.\scripts\Setup-Environments.ps1
 ```
 Installs Python 3.13, uv, Node.js, Mermaid CLI, GTK+ Runtime, and project dependencies.

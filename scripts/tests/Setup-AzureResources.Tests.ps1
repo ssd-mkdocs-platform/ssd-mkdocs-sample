@@ -1,12 +1,12 @@
 $ErrorActionPreference = 'Stop'
 
-Describe 'Setup-CloudResources.ps1' {
+Describe 'Setup-AzureResources.ps1' {
     BeforeAll {
         $start = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).ProviderPath }
         $current = (Resolve-Path $start).ProviderPath
 
         while ($true) {
-            $candidate = Join-Path -Path $current -ChildPath 'Setup-CloudResources.ps1'
+            $candidate = Join-Path -Path $current -ChildPath 'Setup-AzureResources.ps1'
             if (Test-Path $candidate) {
                 $scriptPath = (Resolve-Path $candidate).ProviderPath
                 break
@@ -14,7 +14,7 @@ Describe 'Setup-CloudResources.ps1' {
 
             $parent = Split-Path -Path $current -Parent
             if (-not $parent -or $parent -eq $current) {
-                throw 'Setup-CloudResources.ps1 のパスを解決できません。'
+                throw 'Setup-AzureResources.ps1 のパスを解決できません。'
             }
             $current = $parent
         }
@@ -26,7 +26,7 @@ Describe 'Setup-CloudResources.ps1' {
     }
 
     It 'ドットソースしても外部CLIを呼び出さない' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
 
         Mock -CommandName az { throw 'az should not be called when dot-sourced' }
         Mock -CommandName gh { throw 'gh should not be called when dot-sourced' }
@@ -35,7 +35,7 @@ Describe 'Setup-CloudResources.ps1' {
     }
 
     It '既存リソースグループがある場合はスキップして進む' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $owner = 'nuitsjp'
         $repository = 'swa-github-role-sync-ops'
 
@@ -70,14 +70,8 @@ Describe 'Setup-CloudResources.ps1' {
             if ($cmd -like 'repo view*') {
                 throw 'gh should not be called when Owner/Repository are provided'
             }
-            if ($cmd -like 'repo edit*--enable-discussions*') {
-                return $null
-            }
-            if ($cmd -like 'api graphql*discussionCategory*') {
-                return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
-            }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_SWA_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
@@ -95,7 +89,7 @@ Describe 'Setup-CloudResources.ps1' {
     }
 
     It '既存リソースグループがある場合はForce指定で削除してから作成する' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $owner = 'nuitsjp'
         $repository = 'swa-github-role-sync-ops'
 
@@ -144,12 +138,6 @@ Describe 'Setup-CloudResources.ps1' {
             if ($cmd -like 'repo view*') {
                 throw 'gh repo view should not be called when Owner/Repository are provided'
             }
-            if ($cmd -like 'repo edit*--enable-discussions*') {
-                return $null
-            }
-            if ($cmd -like 'api graphql*discussionCategory*') {
-                return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
-            }
             if ($cmd -like 'secret list*') {
                 return '[]'
             }
@@ -182,11 +170,11 @@ Describe 'Setup-CloudResources.ps1' {
         $global:GroupWaitAttempts | Should -Be 1
         $ghCallLines | Should -Contain 'secret set AZURE_CLIENT_ID --body client-123 --repo nuitsjp/swa-github-role-sync-ops'
         $azCallLines | Should -Contain "staticwebapp secrets list --name stapp-$repository-prod --resource-group rg-$repository-prod --query properties.apiKey -o tsv"
-        $ghCallLines | Should -Contain 'secret set AZURE_SWA_API_TOKEN --body api-key-000 --repo nuitsjp/swa-github-role-sync-ops'
+        $ghCallLines | Should -Contain 'secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body api-key-000 --repo nuitsjp/swa-github-role-sync-ops'
     }
 
     It 'gh repo viewでOwner/Repositoryを解決する' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $defaultHostname = 'example.eastasia.azurestaticapps.net'
         $clientId = 'client-123'
         $principalId = 'principal-456'
@@ -223,12 +211,6 @@ Describe 'Setup-CloudResources.ps1' {
             if ($cmd -eq 'repo view --json owner,name') {
                 return '{ "name": "spec-driven-docs-infra", "owner": { "login": "nuitsjp" } }'
             }
-            if ($cmd -like 'repo edit*--enable-discussions*') {
-                return $null
-            }
-            if ($cmd -like 'api graphql*discussionCategory*') {
-                return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
-            }
             if ($cmd -like 'secret list*') {
                 return '[]'
             }
@@ -253,7 +235,7 @@ Describe 'Setup-CloudResources.ps1' {
     }
 
     It 'ghが失敗したら例外を投げる' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $global:SetupAzCalls = @()
         $global:SetupGhCalls = @()
 
@@ -274,7 +256,7 @@ Describe 'Setup-CloudResources.ps1' {
     }
 
     It 'GitHub Secretsの出力はリポジトリ名を含めず値を表示する' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $owner = 'nuitsjp'
         $repository = 'spec-driven-docs-infra'
         $defaultHostname = 'example.eastasia.azurestaticapps.net'
@@ -313,12 +295,6 @@ Describe 'Setup-CloudResources.ps1' {
         $ghInvoker = {
             $global:SetupGhCalls += ,$args
             $cmd = $args -join ' '
-            if ($cmd -like 'repo edit*--enable-discussions*') {
-                return $null
-            }
-            if ($cmd -like 'api graphql*discussionCategory*') {
-                return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
-            }
             if ($cmd -like 'secret list*') {
                 return '[]'
             }
@@ -339,13 +315,13 @@ Describe 'Setup-CloudResources.ps1' {
         $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_CLIENT_ID: client-123'
         $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_TENANT_ID: tenant-789'
         $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_SUBSCRIPTION_ID: sub-000'
-        $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_SWA_API_TOKEN: (redacted)'
+        $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
         # シークレット設定の出力行（✓を含む行）にリポジトリ名が含まれていないことを検証
         ($global:WriteHostMessages | Where-Object { $_ -like "*✓*$owner/$repository*" }).Count | Should -Be 0
     }
 
     It 'GitHub Apps対話入力でシークレットを設定する' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $owner = 'nuitsjp'
         $repository = 'test-repo'
         $defaultHostname = 'example.eastasia.azurestaticapps.net'
@@ -380,12 +356,6 @@ Describe 'Setup-CloudResources.ps1' {
         $ghInvoker = {
             $global:SetupGhCalls += ,$args
             $cmd = $args -join ' '
-            if ($cmd -like 'repo edit*--enable-discussions*') {
-                return $null
-            }
-            if ($cmd -like 'api graphql*discussionCategory*') {
-                return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
-            }
             if ($cmd -like 'secret list*') {
                 return '[]'
             }
@@ -411,7 +381,7 @@ Describe 'Setup-CloudResources.ps1' {
     }
 
     It '既存シークレットがある場合はスキップして進む' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $owner = 'nuitsjp'
         $repository = 'test-repo'
 
@@ -444,14 +414,8 @@ Describe 'Setup-CloudResources.ps1' {
         $ghInvoker = {
             $global:SetupGhCalls += ,$args
             $cmd = $args -join ' '
-            if ($cmd -like 'repo edit*--enable-discussions*') {
-                return $null
-            }
-            if ($cmd -like 'api graphql*discussionCategory*') {
-                return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
-            }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_SWA_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
@@ -462,137 +426,8 @@ Describe 'Setup-CloudResources.ps1' {
         $global:WriteHostMessages | Should -Contain 'SWA URL: https://example.eastasia.azurestaticapps.net'
     }
 
-    It 'Discussionカテゴリーが既に存在する場合はスキップする' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
-        $owner = 'nuitsjp'
-        $repository = 'test-repo'
-
-        $global:SetupAzCalls = @()
-        $global:SetupGhCalls = @()
-        $global:WriteHostMessages = @()
-
-        Mock -CommandName Write-Host -MockWith {
-            param($Object)
-            $global:WriteHostMessages += $Object
-        }
-
-        $azInvoker = {
-            $global:SetupAzCalls += ,$args
-            switch -Wildcard ($args -join ' ') {
-                'group exists*' { 'false' }
-                '*staticwebapp show*defaultHostname*' { 'example.eastasia.azurestaticapps.net' }
-                '*identity show*clientId*' { 'client-123' }
-                '*identity show*principalId*' { 'principal-456' }
-                '*staticwebapp show* --query id *' { '/subscriptions/sub-000/resourceGroups/rg-test-repo-prod/providers/Microsoft.Web/staticSites/stapp-test-repo-prod' }
-                '*staticwebapp secrets list*' { 'api-key-000' }
-                '*account show*tenantId*' { 'tenant-789' }
-                '*account show* --query id *' { 'sub-000' }
-                '*federated-credential show*' { }
-                '*role assignment list*' { '[{"id":"dummy"}]' }
-                'role assignment create*' { }
-            }
-        }
-
-        $ghInvoker = {
-            $global:SetupGhCalls += ,$args
-            $cmd = $args -join ' '
-            if ($cmd -like 'repo edit*--enable-discussions*') {
-                return $null
-            }
-            if ($cmd -like 'api graphql*discussionCategory*') {
-                # カテゴリーが既に存在する
-                return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
-            }
-            if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_SWA_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
-            }
-        }
-
-        & $scriptPath -Owner $owner -Repository $repository -AzInvoker $azInvoker -GhInvoker $ghInvoker
-
-        $ghCallLines = $global:SetupGhCalls | ForEach-Object { $_ -join ' ' }
-        # Discussions有効化が呼ばれている
-        ($ghCallLines | Where-Object { $_ -like 'repo edit*--enable-discussions*' }).Count | Should -Be 1
-        # カテゴリー確認が呼ばれている
-        ($ghCallLines | Where-Object { $_ -like 'api graphql*discussionCategory*' }).Count | Should -Be 1
-        # スキップメッセージが表示されている
-        $global:WriteHostMessages | Should -Contain '  Invitation category already exists (skipped)'
-    }
-
-    It 'Discussionカテゴリーが存在しない場合はループで案内する' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
-        $owner = 'nuitsjp'
-        $repository = 'test-repo'
-
-        $global:SetupAzCalls = @()
-        $global:SetupGhCalls = @()
-        $global:WriteHostMessages = @()
-        $global:CategoryCheckCount = 0
-
-        Mock -CommandName Write-Host -MockWith {
-            param($Object)
-            $global:WriteHostMessages += $Object
-        }
-
-        $azInvoker = {
-            $global:SetupAzCalls += ,$args
-            switch -Wildcard ($args -join ' ') {
-                'group exists*' { 'false' }
-                '*staticwebapp show*defaultHostname*' { 'example.eastasia.azurestaticapps.net' }
-                '*identity show*clientId*' { 'client-123' }
-                '*identity show*principalId*' { 'principal-456' }
-                '*staticwebapp show* --query id *' { '/subscriptions/sub-000/resourceGroups/rg-test-repo-prod/providers/Microsoft.Web/staticSites/stapp-test-repo-prod' }
-                '*staticwebapp secrets list*' { 'api-key-000' }
-                '*account show*tenantId*' { 'tenant-789' }
-                '*account show* --query id *' { 'sub-000' }
-                '*federated-credential show*' { }
-                '*role assignment list*' { '[{"id":"dummy"}]' }
-                'role assignment create*' { }
-            }
-        }
-
-        $ghInvoker = {
-            $global:SetupGhCalls += ,$args
-            $cmd = $args -join ' '
-            if ($cmd -like 'repo edit*--enable-discussions*') {
-                return $null
-            }
-            if ($cmd -like 'api graphql*discussionCategory*') {
-                $global:CategoryCheckCount++
-                if ($global:CategoryCheckCount -eq 1) {
-                    # 1回目: 存在しない
-                    return '{"data":{"repository":{"discussionCategory":null}}}'
-                }
-                # 2回目以降: 存在する
-                return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
-            }
-            if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_SWA_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
-            }
-        }
-
-        $readHostInvoker = {
-            param([string] $Prompt)
-            switch -Wildcard ($Prompt) {
-                '*カテゴリー作成後*' { '' }
-            }
-        }
-
-        & $scriptPath -Owner $owner -Repository $repository -AzInvoker $azInvoker -GhInvoker $ghInvoker -ReadHostInvoker $readHostInvoker
-
-        $ghCallLines = $global:SetupGhCalls | ForEach-Object { $_ -join ' ' }
-        # Discussions有効化が呼ばれている
-        ($ghCallLines | Where-Object { $_ -like 'repo edit*--enable-discussions*' }).Count | Should -Be 1
-        # カテゴリー確認が2回呼ばれている（1回目:存在しない、2回目:存在する）
-        $global:CategoryCheckCount | Should -Be 2
-        # 案内メッセージが表示されている
-        $global:WriteHostMessages | Should -Contain '=== GitHub Discussions Setup ==='
-        # 確認完了メッセージが表示されている
-        $global:WriteHostMessages | Should -Contain '  ✓ Invitation category verified'
-    }
-
     It 'デフォルトinvokerでOwner/Repository指定時に実行する' {
-        $scriptPath = Join-Path $scriptRoot 'Setup-CloudResources.ps1'
+        $scriptPath = Join-Path $scriptRoot 'Setup-AzureResources.ps1'
         $global:DefaultOwner = 'nuitsjp'
         $global:DefaultRepository = 'swa-github-role-sync-ops'
         $defaultHostname = 'example.eastasia.azurestaticapps.net'
@@ -622,12 +457,6 @@ Describe 'Setup-CloudResources.ps1' {
         function global:gh {
             $global:GhCalls += ,$args
             $cmd = $args -join ' '
-            if ($cmd -like 'repo edit*--enable-discussions*') {
-                return $null
-            }
-            if ($cmd -like 'api graphql*discussionCategory*') {
-                return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
-            }
             if ($cmd -like 'secret list*') {
                 return '[]'
             }
