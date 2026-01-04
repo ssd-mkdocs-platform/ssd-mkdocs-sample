@@ -27,7 +27,8 @@ Describe 'Setup-Environments.ps1' {
                     'TestPathInvoker',
                     'GetChildItemInvoker',
                     'SetLocationInvoker',
-                    'GetLocationInvoker'
+                    'GetLocationInvoker',
+                    'GetEnvironmentVariableInvoker'
                 )) {
                 Set-Variable -Scope Script -Name $name -Value $null -ErrorAction SilentlyContinue
             }
@@ -92,6 +93,57 @@ Describe 'Setup-Environments.ps1' {
             $global:WingetDefaultCalled | Should -Be 1
             $global:NpmDefaultCalled | Should -Be 1
             $global:UvDefaultCalled | Should -Be 1
+        }
+    }
+
+    Context 'Update-Path' {
+        BeforeEach {
+            Reset-SetupEnvInvokers
+            . $scriptPath
+        }
+
+        It 'レジストリから取得したPATHに含まれる環境変数(%VAR%形式)を展開する' {
+            # SystemRootの実際の値を取得（通常は C:\Windows）
+            $actualSystemRoot = $env:SystemRoot
+
+            # 未展開の環境変数を含むPATHをモックで返す
+            Set-Variable -Scope Script -Name GetEnvironmentVariableInvoker -Value {
+                param([string] $Variable, [string] $Target)
+                if ($Variable -eq 'PATH' -and $Target -eq 'Machine') {
+                    return '%SystemRoot%\System32;C:\Program Files\Test'
+                }
+                if ($Variable -eq 'PATH' -and $Target -eq 'User') {
+                    return '%USERPROFILE%\bin'
+                }
+                return $null
+            }
+
+            Update-Path
+
+            # 展開後のパスが含まれていることを確認
+            $env:PATH | Should -Match ([regex]::Escape($actualSystemRoot))
+            # 未展開の%SystemRoot%が残っていないことを確認
+            $env:PATH | Should -Not -Match '%SystemRoot%'
+            # 未展開の%USERPROFILE%が残っていないことを確認
+            $env:PATH | Should -Not -Match '%USERPROFILE%'
+        }
+
+        It 'MachineパスとUserパスの両方を結合する' {
+            Set-Variable -Scope Script -Name GetEnvironmentVariableInvoker -Value {
+                param([string] $Variable, [string] $Target)
+                if ($Variable -eq 'PATH' -and $Target -eq 'Machine') {
+                    return 'C:\Machine\Path'
+                }
+                if ($Variable -eq 'PATH' -and $Target -eq 'User') {
+                    return 'C:\User\Path'
+                }
+                return $null
+            }
+
+            Update-Path
+
+            $env:PATH | Should -Match 'C:\\Machine\\Path'
+            $env:PATH | Should -Match 'C:\\User\\Path'
         }
     }
 
