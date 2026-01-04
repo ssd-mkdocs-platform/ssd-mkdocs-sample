@@ -17,6 +17,7 @@ on:
       - '*.md'
       - '.textlintrc.json'
       - 'package.json'
+  workflow_dispatch:
 
 permissions:
   contents: read
