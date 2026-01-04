@@ -216,8 +216,12 @@ function Invoke-SetupAzureResources {
     # カテゴリー存在確認用の関数
     $checkCategory = {
         $categoryQuery = "query { repository(owner: `"$Owner`", name: `"$Repository`") { discussionCategory(slug: `"invitation`") { id } } }"
-        $result = & $invokeGh api graphql -f "query=$categoryQuery" 2>$null | ConvertFrom-Json
-        return $null -ne $result.data.repository.discussionCategory
+        try {
+            $result = & $invokeGh api graphql -f "query=$categoryQuery" 2>&1 | ConvertFrom-Json
+            return $null -ne $result.data.repository.discussionCategory
+        } catch {
+            return $false
+        }
     }
 
     # 既に存在すればスキップ
