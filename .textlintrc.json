@@ -1,7 +1,11 @@
 {
   "filters": {},
   "rules": {
-    "no-mix-dearu-desumasu": true,
+    "no-mix-dearu-desumasu": {
+      "preferInBody": "である",
+      "preferInHeader": "である",
+      "preferInList": "である"
+    },
     "preset-japanese": {
       "sentence-length": { "max": 150 },
       "max-ten": { "max": 4 },

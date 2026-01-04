@@ -4,11 +4,11 @@ title: Marp
 
 # Marp
 
-Marpはマークダウンからプレゼンテーション資料を作成するツールです。本プロジェクトではMkDocsと統合してWebで表示します。
+Marpはマークダウンからプレゼンテーション資料を作成するツールである。本プロジェクトではMkDocsと統合してWebで表示する。
 
 ## 概要
 
-MarpはMarkdown形式でスライドを記述し、HTML/PDF/PPTXなどに変換できるツールです。
+MarpはMarkdown形式でスライドを記述し、HTML/PDF/PPTXなどに変換できるツールである。
 
 本プロジェクトでの特徴：
 
@@ -20,7 +20,7 @@ MarpはMarkdown形式でスライドを記述し、HTML/PDF/PPTXなどに変換�
 
 ### スライドの区切り
 
-スライドは`---`（水平線）で区切ります。
+スライドは`---`（水平線）で区切る。
 
 ```markdown
 ---
@@ -46,7 +46,7 @@ marp: true
 
 ### フロントマター
 
-スライドの先頭にフロントマターを記述して設定を行います。
+スライドの先頭にフロントマターを記述して設定を行う。
 
 ```markdown
 ---
@@ -73,7 +73,7 @@ footer: 'フッターテキスト'
 
 ### ディレクティブ
 
-スライドごとにスタイルを変更できます。
+スライドごとにスタイルを変更できる。
 
 ```markdown
 ---
@@ -118,7 +118,7 @@ footer: 'フッターテキスト'
 
 ## サンプルスライド
 
-以下はMarpで作成したスライドの例です。
+以下はMarpで作成したスライドの例である。
 
 ---
 marp: true
@@ -162,7 +162,7 @@ graph LR
 
 ## VS Code拡張
 
-Marp for VS Code拡張を使用すると、エディター内でプレビューを確認できます。
+Marp for VS Code拡張を使用すると、エディター内でプレビューを確認できる。
 
 1. VS Codeを開く
 2. 拡張機能で「Marp for VS Code」を検索
@@ -172,7 +172,7 @@ Marp for VS Code拡張を使用すると、エディター内でプレビュー�
 
 ### MkDocs統合でのPDF
 
-MkDocsサイト全体をPDF化する場合は、to-pdfプラグインを使用します。
+MkDocsサイト全体をPDF化する場合は、to-pdfプラグインを使用する。
 
 ```bash
 MKDOCS_PDF=1 uv run mkdocs build
@@ -180,7 +180,7 @@ MKDOCS_PDF=1 uv run mkdocs build
 
 ### スライド単体のPDF
 
-Marp CLIを使用してスライド単体をPDF化できます。
+Marp CLIを使用してスライド単体をPDF化できる。
 
 ```bash
 # Marp CLIのインストール
@@ -198,7 +198,7 @@ marp slides.md --html
 
 ## ファイル配置
 
-Marpスライドはdocsディレクトリ内の任意の場所に配置できます。
+Marpスライドはdocsディレクトリ内の任意の場所に配置できる。
 
 ```
 docs/
