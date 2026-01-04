@@ -56,6 +56,16 @@ if (-not $script:GetLocationInvoker) {
     $script:GetLocationInvoker = { Get-Location }
 }
 
+if (-not $script:GetEnvironmentVariableInvoker) {
+    $script:GetEnvironmentVariableInvoker = {
+        param(
+            [string] $Variable,
+            [string] $Target
+        )
+        [System.Environment]::GetEnvironmentVariable($Variable, $Target)
+    }
+}
+
 function Install-WingetPackage {
     param(
         [Parameter(Mandatory = $true)]
@@ -74,9 +84,9 @@ function Install-WingetPackage {
 }
 
 function Update-Path {
-    $machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
-    $userPath = [System.Environment]::GetEnvironmentVariable("PATH", "User")
-    $env:PATH = "$machinePath;$userPath"
+    $machinePath = & $script:GetEnvironmentVariableInvoker -Variable "PATH" -Target "Machine"
+    $userPath = & $script:GetEnvironmentVariableInvoker -Variable "PATH" -Target "User"
+    $env:PATH = [System.Environment]::ExpandEnvironmentVariables("$machinePath;$userPath")
 }
 
 function Install-NpmGlobalPackage {
