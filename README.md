@@ -37,6 +37,12 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤です。Merm
 - プロジェクト依存パッケージ
 - textlint（ドキュメント品質チェック）
 
+## 推奨VS Code拡張
+
+このプロジェクトを開くと、VS Codeが推奨拡張のインストールを提案します。
+
+- **textlint** (`3w36zj6.textlint`): ワークスペースの`.textlintrc.json`と`node_modules`を参照し、CIと同一ルールでリアルタイム校正を行います。
+
 ## 日常の利用方法
 
 ```powershell
@@ -51,6 +57,9 @@ $env:MKDOCS_PDF=1; uv run mkdocs build
 
 # ドキュメント品質チェック（textlint）
 npm run lint:text
+
+# ドキュメント品質チェック（自動修正）
+npm run lint:text:fix
 ```
 
 ## テスト

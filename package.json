@@ -4,11 +4,16 @@
   "private": true,
   "description": "仕様駆動開発時代のドキュメント基盤",
   "scripts": {
-    "lint:text": "textlint \"docs/**/*.md\" \"*.md\""
+    "lint:text": "textlint \"docs/**/*.md\" \"*.md\"",
+    "lint:text:fix": "textlint --fix \"docs/**/*.md\" \"*.md\""
   },
   "devDependencies": {
     "textlint": "^14.4.0",
+    "textlint-rule-no-mix-dearu-desumasu": "^6.0.4",
+    "textlint-rule-preset-icsmedia": "github:ics-creative/textlint-rule-preset-icsmedia",
+    "textlint-rule-preset-ja-spacing": "^2.4.3",
     "textlint-rule-preset-japanese": "^10.0.3",
-    "textlint-rule-preset-ja-spacing": "^2.4.3"
+    "textlint-rule-preset-jtf-style": "^2.3.14",
+    "textlint-rule-prh": "^6.0.0"
   }
 }

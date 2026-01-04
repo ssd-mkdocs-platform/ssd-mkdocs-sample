@@ -4,7 +4,7 @@ title: Draw.io
 
 # Draw.io
 
-Draw.ioはGUIベースで図を作成できるツールです。VS CodeのDraw.io Integration拡張を使用して、エディタ内で直接編集できます。
+Draw.ioはGUIベースで図を作成できるツールです。VS CodeのDraw.io Integration拡張を使用して、エディター内で直接編集できます。
 
 ## 使用する場面
 
@@ -49,8 +49,8 @@ Draw.ioで作成するファイルは`.drawio.svg`形式を使用します。
 ### 新規作成
 
 1. 対象の文書と同じディレクトリに`.drawio.svg`ファイルを作成
-   - 例: `overview.md` の図なら `overview-architecture.drawio.svg`
-2. VS Codeでファイルを開くと、Draw.ioエディタが起動
+   - 例： `overview.md` の図なら `overview-architecture.drawio.svg`
+2. VS Codeでファイルを開くと、Draw.ioエディターが起動
 3. 図を作成・編集
 4. 保存（Ctrl+S）
 
@@ -80,9 +80,9 @@ docs/
 
 `{文書名}-{図の内容}.drawio.svg`
 
-- 文書名: 関連するMarkdownファイルの名前（拡張子なし）
-- 図の内容: 図が表す内容を簡潔に表現
-- 例: `api-design-flow.drawio.svg`, `system-architecture.drawio.svg`
+- 文書名： 関連するMarkdownファイルの名前（拡張子なし）
+- 図の内容： 図が表す内容を簡潔に表現
+- 例： `api-design-flow.drawio.svg`, `system-architecture.drawio.svg`
 
 ### この配置方式の理由
 
