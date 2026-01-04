@@ -1,7 +1,7 @@
 ---
 name: creating-issues
 description: 対話形式でGitHub Issueを作成する。Use when the user wants to create an issue (Issue作成), report a bug (バグ報告), request a feature (機能追加), or improve documentation (ドキュメント改善).
-allowed-tools: Bash(git remote:*), Bash(gh issue create:*), AskUserQuestion
+allowed-tools: Bash(git remote:*), Bash(gh issue create:*), AskUserQuestion, Skill
 ---
 
 # GitHub Issue作成
@@ -53,3 +53,9 @@ gh issue create --title "タイトル" --body "本文" --label "タイプ"
 ### 4. 結果確認
 
 作成されたIssueのURLを表示。
+
+### 5. 次のアクション確認
+
+AskUserQuestionで「続けてこのIssueの作業を開始しますか？」と確認：
+- **はい**: `Skill` ツールで `starting-issues` を呼び出す（引数に作成したIssue番号を渡す）
+- **いいえ**: 終了
