@@ -12,5 +12,8 @@
                 "wada",
                 "weasyprint",
                 "winget"
-        ]
+        ],
+        "textlint.configPath": ".textlintrc.json",
+        "textlint.autoFixOnSave": false,
+        "textlint.run": "onType"
 }
