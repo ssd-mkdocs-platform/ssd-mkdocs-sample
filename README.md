@@ -12,6 +12,7 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤です。Merm
 | WeasyPrint | PDF生成 |
 | Playwright | Mermaidレンダリング用ブラウザ自動化 |
 | Pester | PowerShellスクリプトのテスト |
+| textlint | ドキュメント品質チェック |
 
 ## 必要環境
 
@@ -34,6 +35,7 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤です。Merm
 - Mermaid CLI
 - GTK+ Runtime（PDF生成用）
 - プロジェクト依存パッケージ
+- textlint（ドキュメント品質チェック）
 
 ## 日常の利用方法
 
@@ -46,6 +48,9 @@ uv run mkdocs build
 
 # PDF生成（GTK Runtimeが必要）
 $env:MKDOCS_PDF=1; uv run mkdocs build
+
+# ドキュメント品質チェック（textlint）
+npm run lint:text
 ```
 
 ## テスト
@@ -69,6 +74,12 @@ GitHub Actionsで以下のワークフローが設定されています：
 - **トリガー**: `scripts/**` 配下の変更時（push/PR）
 - **実行環境**: Windows
 - **内容**: Pesterによるテスト実行
+
+### textlint (`textlint.yml`)
+
+- **トリガー**: `docs/**/*.md`, `*.md` 等の変更時（push/PR）
+- **実行環境**: Ubuntu
+- **内容**: textlintによるドキュメント品質チェック
 
 ### Deploy Site (`deploy-site.yml`)
 

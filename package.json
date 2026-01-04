@@ -1,0 +1,14 @@
+{
+  "name": "spec-driven-docs-infra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "仕様駆動開発時代のドキュメント基盤",
+  "scripts": {
+    "lint:text": "textlint \"docs/**/*.md\" \"*.md\""
+  },
+  "devDependencies": {
+    "textlint": "^14.4.0",
+    "textlint-rule-preset-japanese": "^10.0.3",
+    "textlint-rule-preset-ja-spacing": "^2.4.3"
+  }
+}

@@ -1,0 +1,40 @@
+name: textlint
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/textlint.yml'
+      - 'docs/**/*.md'
+      - '*.md'
+      - '.textlintrc.json'
+      - 'package.json'
+  pull_request:
+    paths:
+      - '.github/workflows/textlint.yml'
+      - 'docs/**/*.md'
+      - '*.md'
+      - '.textlintrc.json'
+      - 'package.json'
+
+permissions:
+  contents: read
+
+jobs:
+  textlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run textlint
+        run: npm run lint:text
