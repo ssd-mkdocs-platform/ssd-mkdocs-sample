@@ -1,4 +1,4 @@
-name: Role Sync (Released)
+name: Sync Role
 
 on:
   workflow_dispatch:
