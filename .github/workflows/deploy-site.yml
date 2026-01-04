@@ -21,9 +21,12 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
 
 jobs:
-  deploy:
+  build:
     if: github.event_name != 'pull_request' || github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
@@ -51,22 +54,46 @@ jobs:
         run: uv run python -m playwright install chromium
 
       - name: Install PDF dependencies
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           sudo apt-get update
           sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk fonts-noto-cjk-extra
 
       - name: Build site (PDF enabled)
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         env:
           MKDOCS_PDF: "1"
         run: uv run mkdocs build
 
       - name: Build site
-        if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+        if: github.ref != 'refs/heads/main' || github.event_name != 'push'
         run: uv run mkdocs build
 
-      - name: Deploy static site
+      - name: Upload artifact for Azure
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-azure
+          path: site/
+
+      - name: Upload artifact for GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+  deploy-azure:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site-azure
+          path: site/
+
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
@@ -76,6 +103,18 @@ jobs:
           api_location: ""
           output_location: ""
           skip_app_build: true
+
+  deploy-github-pages:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
