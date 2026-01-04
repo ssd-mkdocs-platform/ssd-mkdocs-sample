@@ -268,7 +268,7 @@ function Invoke-SetupAzureResources {
     }
 
     # 必要なシークレット一覧
-    $requiredSecrets = @('AZURE_CLIENT_ID', 'AZURE_TENANT_ID', 'AZURE_SUBSCRIPTION_ID', 'AZURE_STATIC_WEB_APPS_API_TOKEN', 'AZURE_SWA_NAME', 'AZURE_SWA_RESOURCE_GROUP', 'ROLE_SYNC_APP_ID', 'ROLE_SYNC_APP_PRIVATE_KEY')
+    $requiredSecrets = @('AZURE_CLIENT_ID', 'AZURE_TENANT_ID', 'AZURE_SUBSCRIPTION_ID', 'AZURE_SWA_API_TOKEN', 'AZURE_SWA_NAME', 'AZURE_SWA_RESOURCE_GROUP', 'ROLE_SYNC_APP_ID', 'ROLE_SYNC_APP_PRIVATE_KEY')
     $allSecretsExist = $true
     foreach ($secret in $requiredSecrets) {
         if ($secret -notin $existingSecrets) {
@@ -291,14 +291,14 @@ function Invoke-SetupAzureResources {
         & $invokeGh secret set AZURE_CLIENT_ID --body $clientId --repo $githubRepo | Out-Null
         & $invokeGh secret set AZURE_TENANT_ID --body $tenantId --repo $githubRepo | Out-Null
         & $invokeGh secret set AZURE_SUBSCRIPTION_ID --body $subscriptionId --repo $githubRepo | Out-Null
-        & $invokeGh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body $staticWebAppsApiToken --repo $githubRepo | Out-Null
+        & $invokeGh secret set AZURE_SWA_API_TOKEN --body $staticWebAppsApiToken --repo $githubRepo | Out-Null
         & $invokeGh secret set AZURE_SWA_NAME --body $swaName --repo $githubRepo | Out-Null
         & $invokeGh secret set AZURE_SWA_RESOURCE_GROUP --body $resourceGroupName --repo $githubRepo | Out-Null
 
         Write-Host "  ✓ Set Actions secret AZURE_CLIENT_ID: $clientId"
         Write-Host "  ✓ Set Actions secret AZURE_TENANT_ID: $tenantId"
         Write-Host "  ✓ Set Actions secret AZURE_SUBSCRIPTION_ID: $subscriptionId"
-        Write-Host '  ✓ Set Actions secret AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
+        Write-Host '  ✓ Set Actions secret AZURE_SWA_API_TOKEN: (redacted)'
         Write-Host "  ✓ Set Actions secret AZURE_SWA_NAME: $swaName"
         Write-Host "  ✓ Set Actions secret AZURE_SWA_RESOURCE_GROUP: $resourceGroupName"
 

@@ -77,7 +77,7 @@ Describe 'Setup-CloudResources.ps1' {
                 return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
             }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_SWA_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
@@ -182,7 +182,7 @@ Describe 'Setup-CloudResources.ps1' {
         $global:GroupWaitAttempts | Should -Be 1
         $ghCallLines | Should -Contain 'secret set AZURE_CLIENT_ID --body client-123 --repo nuitsjp/swa-github-role-sync-ops'
         $azCallLines | Should -Contain "staticwebapp secrets list --name stapp-$repository-prod --resource-group rg-$repository-prod --query properties.apiKey -o tsv"
-        $ghCallLines | Should -Contain 'secret set AZURE_STATIC_WEB_APPS_API_TOKEN --body api-key-000 --repo nuitsjp/swa-github-role-sync-ops'
+        $ghCallLines | Should -Contain 'secret set AZURE_SWA_API_TOKEN --body api-key-000 --repo nuitsjp/swa-github-role-sync-ops'
     }
 
     It 'gh repo viewでOwner/Repositoryを解決する' {
@@ -339,7 +339,7 @@ Describe 'Setup-CloudResources.ps1' {
         $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_CLIENT_ID: client-123'
         $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_TENANT_ID: tenant-789'
         $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_SUBSCRIPTION_ID: sub-000'
-        $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_STATIC_WEB_APPS_API_TOKEN: (redacted)'
+        $global:WriteHostMessages | Should -Contain '  ✓ Set Actions secret AZURE_SWA_API_TOKEN: (redacted)'
         # シークレット設定の出力行（✓を含む行）にリポジトリ名が含まれていないことを検証
         ($global:WriteHostMessages | Where-Object { $_ -like "*✓*$owner/$repository*" }).Count | Should -Be 0
     }
@@ -451,7 +451,7 @@ Describe 'Setup-CloudResources.ps1' {
                 return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
             }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_SWA_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
@@ -504,7 +504,7 @@ Describe 'Setup-CloudResources.ps1' {
                 return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
             }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_SWA_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
@@ -567,7 +567,7 @@ Describe 'Setup-CloudResources.ps1' {
                 return '{"data":{"repository":{"discussionCategory":{"id":"DC_123"}}}}'
             }
             if ($cmd -like 'secret list*') {
-                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_STATIC_WEB_APPS_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
+                return '[{"name":"AZURE_CLIENT_ID"},{"name":"AZURE_TENANT_ID"},{"name":"AZURE_SUBSCRIPTION_ID"},{"name":"AZURE_SWA_API_TOKEN"},{"name":"AZURE_SWA_NAME"},{"name":"AZURE_SWA_RESOURCE_GROUP"},{"name":"ROLE_SYNC_APP_ID"},{"name":"ROLE_SYNC_APP_PRIVATE_KEY"}]'
             }
         }
 
