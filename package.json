@@ -4,8 +4,8 @@
   "private": true,
   "description": "仕様駆動開発時代のドキュメント基盤",
   "scripts": {
-    "lint:text": "textlint \"docs/**/*.md\" \"*.md\"",
-    "lint:text:fix": "textlint --fix \"docs/**/*.md\" \"*.md\""
+    "lint:text": "textlint \"**/*.md\" \"*.md\"",
+    "lint:text:fix": "textlint --fix \"**/*.md\" \"*.md\""
   },
   "devDependencies": {
     "textlint": "^14.4.0",
