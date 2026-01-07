@@ -8,36 +8,55 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤である。M
 |------|------|
 | MkDocs + Material for MkDocs | 静的サイトジェネレーター |
 | Mermaid | Markdown内での図表作成 |
-| Draw.io | SVG図表（PNG変換） |
-| WeasyPrint | PDF生成 |
+| Draw.io | SVG図表作成 |
 | Playwright | Mermaidレンダリング用ブラウザ自動化 |
-| Pester | PowerShellスクリプトのテスト |
+| WeasyPrint | PDF生成 |
 | textlint | ドキュメント品質チェック |
 
-## 必要環境
-
-- Windows OS
-- 管理者権限（初回セットアップ時）
-
-## 環境構築
-
-管理者としてPowerShellを開き、以下を実行する：
-
-```powershell
-.\scripts\Setup-Environments.ps1
-```
-
-このスクリプトは以下をインストールする：
+## システム要件
 
 - Python 3.13
 - uv（Pythonパッケージマネージャー）
 - Node.js
-- Mermaid CLI
-- GTK+ Runtime（PDF生成用）
-- プロジェクト依存パッケージ
-- textlint（ドキュメント品質チェック）
+- pnpm（Node.jsパッケージマネージャー）
 
-## 推奨VS Code拡張
+## 環境構築
+
+### Node.jsパッケージの導入
+
+```shell
+pnpm install
+```
+
+### Pythonパッケージの導入
+
+```shell
+uv sync
+```
+
+### GTK+ Runtimeのインストール
+
+GTK+ RuntimeはweasyprintのPDF生成に必要な依存パッケージをインストールする。
+
+#### Windows
+
+```pwsh
+winget install --id tschoonj.GTKForWindows
+```
+
+#### Linux
+
+```bash
+sudo apt-get update
+sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk fonts-noto-cjk-extra
+```
+#### macOS
+
+```bash
+brew install python pango libffi
+```
+
+### 推奨VS Code拡張
 
 - **textlint** (`3w36zj6.textlint`): ワークスペースの`.textlintrc.json`と`node_modules`を参照し、CIと同一ルールでリアルタイム校正を行う。
 
@@ -54,60 +73,8 @@ uv run mkdocs build
 $env:MKDOCS_PDF=1; uv run mkdocs build
 
 # ドキュメント品質チェック（textlint）
-npm run lint:text
+pnpm run lint:text
 
 # ドキュメント品質チェック（自動修正）
-npm run lint:text:fix
-```
-
-## テスト
-
-PowerShellスクリプトのテストにはPesterを使用する。
-
-```powershell
-# 全テスト実行（カバレッジ付き）
-./scripts/tests/Run-AllTests.ps1
-
-# 単一テストファイルの実行
-Invoke-Pester -Path ./scripts/tests/Setup-Environments.Tests.ps1
-```
-
-## CI/CD
-
-GitHub Actionsで以下のワークフローが設定されている：
-
-### CI Tests (`ci-tests.yml`)
-
-- **トリガー**: `scripts/**` 配下の変更時（push/PR）
-- **実行環境**: Windows
-- **内容**: Pesterによるテスト実行
-
-### textlint (`textlint.yml`)
-
-- **トリガー**: `docs/**/*.md`, `*.md` 等の変更時（push/PR）
-- **実行環境**: Ubuntu
-- **内容**: textlintによるドキュメント品質チェック
-
-### Deploy Site (`deploy-site.yml`)
-
-- **トリガー**: `docs/**`, `mkdocs.yml`, `pyproject.toml` 等の変更時
-- **実行環境**: Ubuntu
-- **デプロイ先**:
-  - Azure Static Web Apps（全ブランチ）
-  - GitHub Pages（mainブランチのみ）
-- **PDF生成**: mainブランチへのpush時のみ有効
-
-PRを作成すると、Azure Static Web Appsにプレビュー環境が自動デプロイされる。
-
-## プロジェクト構造
-
-```
-.
-├── docs/                  # ドキュメントソース（Markdown）
-├── scripts/               # PowerShellスクリプト
-│   ├── Setup-Environments.ps1  # 環境構築スクリプト
-│   └── tests/             # Pesterテスト
-├── mkdocs.yml             # MkDocs設定（ナビゲーション、プラグイン）
-├── pyproject.toml         # Python依存関係（uv管理）
-└── uv.lock                # 依存関係ロックファイル
+pnpm run lint:text:fix
 ```
