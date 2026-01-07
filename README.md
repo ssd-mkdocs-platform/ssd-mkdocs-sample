@@ -1,6 +1,6 @@
 # 仕様駆動開発時代のドキュメント基盤
 
-MkDocs + Material for MkDocsを使用したドキュメント基盤です。Mermaidによる図表作成、WeasyPrintによるPDF生成をサポートしています。
+MkDocs + Material for MkDocsを使用したドキュメント基盤である。Mermaidによる図表作成、WeasyPrintによるPDF生成をサポートしている。
 
 ## 技術スタック
 
@@ -21,13 +21,13 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤です。Merm
 
 ## 環境構築
 
-管理者としてPowerShellを開き、以下を実行します：
+管理者としてPowerShellを開き、以下を実行する：
 
 ```powershell
 .\scripts\Setup-Environments.ps1
 ```
 
-このスクリプトは以下をインストールします：
+このスクリプトは以下をインストールする：
 
 - Python 3.13
 - uv（Pythonパッケージマネージャー）
@@ -39,9 +39,7 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤です。Merm
 
 ## 推奨VS Code拡張
 
-このプロジェクトを開くと、VS Codeが推奨拡張のインストールを提案します。
-
-- **textlint** (`3w36zj6.textlint`): ワークスペースの`.textlintrc.json`と`node_modules`を参照し、CIと同一ルールでリアルタイム校正を行います。
+- **textlint** (`3w36zj6.textlint`): ワークスペースの`.textlintrc.json`と`node_modules`を参照し、CIと同一ルールでリアルタイム校正を行う。
 
 ## 日常の利用方法
 
@@ -64,7 +62,7 @@ npm run lint:text:fix
 
 ## テスト
 
-PowerShellスクリプトのテストにはPesterを使用します。
+PowerShellスクリプトのテストにはPesterを使用する。
 
 ```powershell
 # 全テスト実行（カバレッジ付き）
@@ -76,7 +74,7 @@ Invoke-Pester -Path ./scripts/tests/Setup-Environments.Tests.ps1
 
 ## CI/CD
 
-GitHub Actionsで以下のワークフローが設定されています：
+GitHub Actionsで以下のワークフローが設定されている：
 
 ### CI Tests (`ci-tests.yml`)
 
@@ -99,7 +97,7 @@ GitHub Actionsで以下のワークフローが設定されています：
   - GitHub Pages（mainブランチのみ）
 - **PDF生成**: mainブランチへのpush時のみ有効
 
-PRを作成すると、Azure Static Web Appsにプレビュー環境が自動デプロイされます。
+PRを作成すると、Azure Static Web Appsにプレビュー環境が自動デプロイされる。
 
 ## プロジェクト構造
 
