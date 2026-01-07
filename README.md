@@ -22,21 +22,9 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤である。M
 
 ## 環境構築
 
-### Node.jsパッケージの導入
-
-```shell
-pnpm install
-```
-
-### Pythonパッケージの導入
-
-```shell
-uv sync
-```
-
 ### GTK+ Runtimeのインストール
 
-GTK+ RuntimeはweasyprintのPDF生成に必要な依存パッケージをインストールする。
+weasyprintのPDF生成に必要なGTK+ Runtimeをインストールする。ローカルでPDFをビルドしないなら不要。
 
 #### Windows
 
@@ -56,25 +44,57 @@ sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 lib
 brew install python pango libffi
 ```
 
-### 推奨VS Code拡張
+### Node.js & Pythonパッケージの導入
 
-- **textlint** (`3w36zj6.textlint`): ワークスペースの`.textlintrc.json`と`node_modules`を参照し、CIと同一ルールでリアルタイム校正を行う。
+```shell
+pnpm install
+uv sync
+```
 
-## 日常の利用方法
+### VS Code拡張
 
-```powershell
-# ローカルプレビュー（http://127.0.0.1:8000 でライブリロード）
+CIと同一ルールでリアルタイム校正を行う。
+
+```shell
+code --install-extension 3w36zj6.textlint
+```
+
+## 利用方法
+
+### 文書記述
+
+MkDocsを起動してプレビューを確認しながら文書を記述する。
+
+```shell
+# ローカルプレビュー（http://127.0.0.1:8000）
 uv run mkdocs serve
+```
 
+### Pull Request作成前チェック
+
+文書のリンク切れや、ドキュメント品質をチェックする。
+
+```shell
 # 本番ビルド
 uv run mkdocs build
-
-# PDF生成（GTK Runtimeが必要）
-$env:MKDOCS_PDF=1; uv run mkdocs build
 
 # ドキュメント品質チェック（textlint）
 pnpm run lint:text
 
 # ドキュメント品質チェック（自動修正）
 pnpm run lint:text:fix
+```
+
+### PDF生成
+
+#### Windows
+
+```powershell
+$env:MKDOCS_PDF=1; uv run mkdocs build
+```
+
+#### Linux & macOS
+
+```bash
+MKDOCS_PDF=1 uv run mkdocs build
 ```
