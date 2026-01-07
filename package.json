@@ -2,6 +2,7 @@
   "name": "spec-driven-docs-infra",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.27.0",
   "description": "仕様駆動開発時代のドキュメント基盤",
   "scripts": {
     "lint:text": "textlint \"**/*.md\" \"*.md\"",

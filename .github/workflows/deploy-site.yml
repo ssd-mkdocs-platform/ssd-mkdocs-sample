@@ -34,6 +34,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up uv
         uses: astral-sh/setup-uv@v3
         with:
@@ -43,9 +46,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "pnpm"
 
       - name: Install Mermaid CLI
-        run: npm install -g @mermaid-js/mermaid-cli
+        run: pnpm add -g @mermaid-js/mermaid-cli
 
       - name: Sync dependencies
         run: uv sync
