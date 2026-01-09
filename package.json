@@ -5,8 +5,8 @@
   "packageManager": "pnpm@10.27.0",
   "description": "仕様駆動開発時代のドキュメント基盤",
   "scripts": {
-    "lint:text": "textlint \"**/*.md\" \"*.md\"",
-    "lint:text:fix": "textlint --fix \"**/*.md\" \"*.md\""
+    "lint:text": "textlint \"**/*.md\"",
+    "lint:text:fix": "textlint --fix \"**/*.md\""
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.12.0",
