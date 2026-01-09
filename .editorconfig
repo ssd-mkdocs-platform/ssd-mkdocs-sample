@@ -1,0 +1,33 @@
+# EditorConfig - https://editorconfig.org
+root = true
+
+# 全ファイル共通
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# JSON ファイル
+[*.json]
+indent_size = 2
+
+# YAML ファイル
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown ファイル
+[*.md]
+trim_trailing_whitespace = false
+
+# PowerShell スクリプト
+[*.ps1]
+indent_size = 4
+
+# Bash スクリプト
+[*.sh]
+indent_style = space
+indent_size = 2
+
