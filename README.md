@@ -15,10 +15,13 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤である。M
 
 ## システム要件
 
-- Python 3.13
+事前に以下のソフトウェアが利用可能な状態にしておくこと。
+
+- Python 3.13+
 - uv（Pythonパッケージマネージャー）
-- Node.js
-- pnpm（Node.jsパッケージマネージャー）
+- [Node.js](https://nodejs.org/)
+- [pnpm](https://pnpm.io/ja/installation)
+- [ni](https://github.com/antfu-collective/ni)
 
 ## 環境構築
 
