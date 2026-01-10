@@ -3,6 +3,18 @@ site_description: Best practices for business system documentation and a collect
 site_author: Documentation Team
 copyright: Copyright &copy; 2024 @nuits.jp
 
+nav:
+  - ホーム: index.md
+  - クラウド環境構築: cloud-resources-setup.md
+  - アーキテクチャー:
+      - 概要: アーキテクチャー/index.md
+      - テキスト検証: アーキテクチャー/text-validation.md
+  - サンプル:
+      - 目次: サンプル/index.md
+      - Draw.io: サンプル/draw-io.md
+      - Marp: サンプル/marp.md
+      - Mermaid: サンプル/mermaid.md
+
 theme:
   name: material
   language: ja
@@ -17,6 +29,8 @@ markdown_extensions:
   - attr_list
   - admonition
   - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
