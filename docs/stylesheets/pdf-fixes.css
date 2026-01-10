@@ -1,0 +1,8 @@
+@media print {
+  img,
+  svg {
+    max-width: 100%;
+    max-height: 230mm;   /* A4 用紙余白込みで収まる高さに調整 */
+    height: auto;
+  }
+}

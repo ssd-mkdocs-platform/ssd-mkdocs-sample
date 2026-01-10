@@ -39,6 +39,10 @@ markdown_extensions:
   - toc:
       permalink: true
 
+watch:
+  - docs
+  - mkdocs.yml
+
 plugins:
   - search
   - mermaid-to-svg:

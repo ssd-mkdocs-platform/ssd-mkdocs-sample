@@ -6,7 +6,7 @@
   "description": "仕様駆動開発時代のドキュメント基盤",
   "scripts": {
     "python:sync": "uv sync",
-    "mkdocs": "uv run mkdocs serve",
+    "mkdocs": "uv run mkdocs serve --livereload",
     "mkdocs:build": "uv run mkdocs build",
     "mkdocs:pdf": "node scripts/mkdocs-pdf.mjs",
     "lint:text": "textlint \"**/*.md\"",
