@@ -1,6 +1,4 @@
-# クラウド環境構築手順（Azure Static Web Apps + GitHub）
-
-Azure Static Web Apps と GitHub Actions/OIDC を連携させ、GitHub Discussions と必要な Secrets/Variables を準備する。
+# クラウド環境構築手順
 
 ## 前提条件
 
@@ -11,9 +9,7 @@ Azure Static Web Apps と GitHub Actions/OIDC を連携させ、GitHub Discussio
 
 ## 手順
 
-### Azure リソースと GitHub 設定の作成
-
-#### 2. 命名規則とパラメーターを設定する
+### 1. 命名規則とパラメーターを設定する
 
 GitHubのOwnerとRepository名を設定する。
 
@@ -49,27 +45,45 @@ GitHubのOwnerとRepository名を設定する。
     federatedCredentialName="fc-github-actions-main"
     ```
 
-#### 4. リソースグループとStatic Web App を作成する
+### 2. リソースグループと Static Web App の作成
 
 === "PowerShell"
 
     ```powershell
     az group create --name $resourceGroupName --location $location
-    az staticwebapp create --name $swaName --resource-group $resourceGroupName --location $swaLocation --sku Standard
 
-    $defaultHostname = az staticwebapp show --name $swaName --resource-group $resourceGroupName --query defaultHostname -o tsv
+    az staticwebapp create `
+      --name $swaName `
+      --resource-group $resourceGroupName `
+      --location $swaLocation `
+      --sku Standard
+
+    $defaultHostname = az staticwebapp show `
+      --name $swaName `
+      --resource-group $resourceGroupName `
+      --query defaultHostname `
+      -o tsv
     ```
 
 === "Bash"
 
     ```bash
     az group create --name $resourceGroupName --location $location
-    az staticwebapp create --name $swaName --resource-group $resourceGroupName --location $swaLocation --sku Standard
 
-    defaultHostname=$(az staticwebapp show --name $swaName --resource-group $resourceGroupName --query defaultHostname -o tsv)
+    az staticwebapp create \
+      --name $swaName \
+      --resource-group $resourceGroupName \
+      --location $swaLocation \
+      --sku Standard
+
+    defaultHostname=$(az staticwebapp show \
+      --name $swaName \
+      --resource-group $resourceGroupName \
+      --query defaultHostname \
+      -o tsv)
     ```
 
-#### 5. マネージドIDを作成し、OIDCフェデレーション資格情報を作成する
+### 3. マネージド ID と OIDC フェデレーション資格情報の作成
 
 既定ブランチが `main` 以外の場合は `--subject` の `refs/heads/main` を置き換える。
 
@@ -78,11 +92,21 @@ GitHubのOwnerとRepository名を設定する。
     ```powershell
     az identity create --name $identityName --resource-group $resourceGroupName --location $location
 
-    $identity = az identity show --name $identityName --resource-group $resourceGroupName --query "{clientId:clientId, principalId:principalId}" -o json | ConvertFrom-Json
+    $identity = az identity show `
+      --name $identityName `
+      --resource-group $resourceGroupName `
+      --query "{clientId:clientId, principalId:principalId}" `
+      -o json | ConvertFrom-Json
     $clientId = $identity.clientId
     $principalId = $identity.principalId
 
-    az identity federated-credential create --name $federatedCredentialName --identity-name $identityName --resource-group $resourceGroupName --issuer "https://token.actions.githubusercontent.com" --subject "repo:$githubRepo:ref:refs/heads/main" --audiences "api://AzureADTokenExchange"
+    az identity federated-credential create `
+      --name $federatedCredentialName `
+      --identity-name $identityName `
+      --resource-group $resourceGroupName `
+      --issuer "https://token.actions.githubusercontent.com" `
+      --subject "repo:$githubRepo:ref:refs/heads/main" `
+      --audiences "api://AzureADTokenExchange"
     ```
 
 === "Bash"
@@ -90,31 +114,71 @@ GitHubのOwnerとRepository名を設定する。
     ```bash
     az identity create --name $identityName --resource-group $resourceGroupName --location $location
 
-    clientId=$(az identity show --name $identityName --resource-group $resourceGroupName --query clientId -o tsv)
-    principalId=$(az identity show --name $identityName --resource-group $resourceGroupName --query principalId -o tsv)
+    clientId=$(az identity show \
+      --name $identityName \
+      --resource-group $resourceGroupName \
+      --query clientId \
+      -o tsv)
+    principalId=$(az identity show \
+      --name $identityName \
+      --resource-group $resourceGroupName \
+      --query principalId \
+      -o tsv)
 
-    az identity federated-credential create --name $federatedCredentialName --identity-name $identityName --resource-group $resourceGroupName --issuer "https://token.actions.githubusercontent.com" --subject "repo:$githubRepo:ref:refs/heads/main" --audiences "api://AzureADTokenExchange"
+    az identity federated-credential create \
+      --name $federatedCredentialName \
+      --identity-name $identityName \
+      --resource-group $resourceGroupName \
+      --issuer "https://token.actions.githubusercontent.com" \
+      --subject "repo:$githubRepo:ref:refs/heads/main" \
+      --audiences "api://AzureADTokenExchange"
     ```
 
-#### 7. Static Web App への RBAC を付与する
+### 4. Static Web App への RBAC 付与
 
 伝播待ちで失敗する場合は数十秒待って再実行する。
 
 === "PowerShell"
 
     ```powershell
-    $swaId = az staticwebapp show --name $swaName --resource-group $resourceGroupName --query id -o tsv
-    az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role Contributor --scope $swaId
+    $swaId = az staticwebapp show `
+      --name $swaName `
+      --resource-group $resourceGroupName `
+      --query id `
+      -o tsv
+    az role assignment create `
+      --assignee-object-id $principalId `
+      --assignee-principal-type ServicePrincipal `
+      --role Contributor `
+      --scope $swaId
     ```
 
 === "Bash"
 
     ```bash
-    swaId=$(az staticwebapp show --name $swaName --resource-group $resourceGroupName --query id -o tsv)
-    az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role Contributor --scope $swaId
+    swaId=$(az staticwebapp show \
+      --name $swaName \
+      --resource-group $resourceGroupName \
+      --query id \
+      -o tsv)
+    az role assignment create \
+      --assignee-object-id $principalId \
+      --assignee-principal-type ServicePrincipal \
+      --role Contributor \
+      --scope $swaId
     ```
 
-#### 8. GitHub Discussions を有効化し、カテゴリを作成する
+### 5. GitHub Pages の有効化
+
+GitHub Pagesにデプロイするため、リポジトリ設定で有効化する必要がある。
+
+1. GitHub リポジトリの `Settings -> Pages` に移動する。
+2. `Build and deployment` の `Source` で `GitHub Actions` を選択する。
+
+!!! note "Environment の自動作成"
+    GitHub Actions をソースに設定すると、`github-pages` という名前の environment が自動的に作成される。ワークフローはこの environment を使用してデプロイを行う。
+
+### 6. GitHub Discussions の有効化とカテゴリ作成
 
 ```shell
 gh repo edit $githubRepo --enable-discussions
@@ -125,14 +189,18 @@ gh repo edit $githubRepo --enable-discussions
 3. `Categories -> New category` をクリックする。
 4. `Name: Invitation`, `Description: SWA role sync invitations`, `Format: Announcement` を設定して作成する。
 
-#### 9. GitHub Actions の Variables と Secrets を登録する
+### 7. GitHub Actions の Variables と Secrets の登録
 
 === "PowerShell"
 
     ```powershell
     $tenantId = az account show --query tenantId -o tsv
     $subscriptionId = az account show --query id -o tsv
-    $swaApiToken = az staticwebapp secrets list --name $swaName --resource-group $resourceGroupName --query properties.apiKey -o tsv
+    $swaApiToken = az staticwebapp secrets list `
+      --name $swaName `
+      --resource-group $resourceGroupName `
+      --query properties.apiKey `
+      -o tsv
 
     gh variable set AZURE_CLIENT_ID --body $clientId --repo $githubRepo
     gh variable set AZURE_TENANT_ID --body $tenantId --repo $githubRepo
@@ -148,7 +216,11 @@ gh repo edit $githubRepo --enable-discussions
     ```bash
     tenantId=$(az account show --query tenantId -o tsv)
     subscriptionId=$(az account show --query id -o tsv)
-    swaApiToken=$(az staticwebapp secrets list --name $swaName --resource-group $resourceGroupName --query properties.apiKey -o tsv)
+    swaApiToken=$(az staticwebapp secrets list \
+      --name $swaName \
+      --resource-group $resourceGroupName \
+      --query properties.apiKey \
+      -o tsv)
 
     gh variable set AZURE_CLIENT_ID --body "${clientId}" --repo $githubRepo
     gh variable set AZURE_TENANT_ID --body "${tenantId}" --repo $githubRepo
@@ -159,7 +231,7 @@ gh repo edit $githubRepo --enable-discussions
     gh secret set AZURE_SWA_API_TOKEN --body "${swaApiToken}" --repo $githubRepo
     ```
 
-#### 10. GitHub App を作成し、連携情報を登録する
+### 8. GitHub App の作成と連携情報の登録
 
 1. `GitHub -> Settings -> Developer settings -> GitHub Apps -> New GitHub App` を開く。
 2. `App name` は任意、`Homepage URL` はリポジトリ URL を入力する。
