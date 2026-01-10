@@ -1,16 +1,28 @@
 # 仕様駆動開発時代のドキュメント基盤
 
-近年、生成AIの活用が進みドキュメントの重要性が再認識されている。
+仕様駆動開発時代におけるドキュメント基盤のテンプレート。
 
-AWSからはKiro、GitHubからはSpec Kitも登場し、仕様駆動開発も注目を集めている。
+Markdown文書を静的サイトジェネレーターでHTMLに変換・公開することで、つぎを実現しする。
 
-これらはMarkdownをgitで管理するが、プロダクトレベルでは多くの課題が存在する。
+- Markdownによる文書記述
+- Mermaidによる図表作成
+- Draw.ioによるSVG図表作成
+- GitHub Pages*1 もしくはAzure Static Web Apps（以降SWA）による正式文書公開
+- Pull Request時にSWAでのプレビュー
+- GitHubリポジトリの権限に応じたセキュリティ管理*1
 
-図表は何で描くか？扱いやすく共有するには？PDF化は可能か？プレゼン資料は？
+*1: GitHub Pagesでリポジトリ権限に応じた閲覧制御を行うには、GitHub Enterpriseプランが必要
 
-私たちは7年前、金融SIプロジェクトで800ページを超えるOffice文書をMarkdownに移行し、開発してきた。
+## 技術スタック
 
-ここで得た、多くのノウハウを共有する。
+| 技術 | 用途 |
+|------|------|
+| MkDocs + Material for MkDocs | 静的サイトジェネレーター |
+| Mermaid | Markdown内での図表作成 |
+| Draw.io | SVG図表作成 |
+| Playwright | Mermaidレンダリング用ブラウザ自動化 |
+| WeasyPrint | PDF生成 |
+| textlint | ドキュメント品質チェック |
 
 ## 外部リソース
 

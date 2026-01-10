@@ -8,4 +8,5 @@ title: アーキテクチャ
 
 ## ドキュメント
 
+- [デプロイ構成](deploy-architecture.md) - GitHub Actions と Azure Static Web Apps を使った配信構成
 - [テキスト校正](text-validation.md) - textlintによる日本語文書の品質管理

@@ -8,6 +8,7 @@ nav:
   - クラウド環境構築: cloud-resources-setup.md
   - アーキテクチャー:
       - 概要: アーキテクチャー/index.md
+      - デプロイ構成: アーキテクチャー/deploy-architecture.md
       - テキスト検証: アーキテクチャー/text-validation.md
   - サンプル:
       - 目次: サンプル/index.md

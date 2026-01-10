@@ -1,6 +1,18 @@
 # 仕様駆動開発時代のドキュメント基盤
 
-MkDocs + Material for MkDocsを使用したドキュメント基盤である。Mermaidによる図表作成、WeasyPrintによるPDF生成をサポートしている。
+仕様駆動開発時代におけるドキュメント基盤のテンプレート。
+
+Markdown文書を静的サイトジェネレーターでHTMLに変換・公開することで、つぎを実現しする。
+
+- Markdownによる文書記述
+- Mermaidによる図表作成
+- Draw.ioによるSVG図表作成
+- textlintによる品質チェック・フィックスでチームの水準を揃える
+- GitHub Pages*1 もしくはAzure Static Web Apps（以降SWA）による正式文書公開
+- Pull Request時にSWAでのプレビュー
+- GitHubリポジトリの権限に応じたセキュリティ管理*1
+
+*1: GitHub Pagesでリポジトリ権限に応じた閲覧制御を行うには、GitHub Enterpriseプランが必要
 
 ## 技術スタック
 
@@ -12,89 +24,3 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤である。M
 | Playwright | Mermaidレンダリング用ブラウザ自動化 |
 | WeasyPrint | PDF生成 |
 | textlint | ドキュメント品質チェック |
-
-## システム要件
-
-事前に以下のソフトウェアが利用可能な状態にしておくこと。
-
-- Python 3.13+
-- uv 0.9.17+
-- Node.js 24.12.0+
-- pnpm 10.27.0+
-
-## 環境構築
-
-### GTK+ Runtimeのインストール
-
-weasyprintのPDF生成に必要なGTK+ Runtimeをインストールする。ローカルでPDFをビルドしないなら不要。
-
-#### Windows
-
-```pwsh
-winget install --id tschoonj.GTKForWindows
-```
-
-#### Linux
-
-```bash
-sudo apt-get update
-sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk fonts-noto-cjk-extra
-```
-#### macOS
-
-```bash
-brew install python pango libffi
-```
-
-### Node.js & Pythonパッケージの導入
-
-```shell
-pnpm install
-pnpm run python:sync
-```
-
-### VS Code拡張
-
-CIと同一ルールでリアルタイム校正を行う。
-
-```shell
-code --install-extension 3w36zj6.textlint
-```
-
-## 利用方法
-
-### 文書記述
-
-MkDocsを起動してプレビューを確認しながら文書を記述する。
-
-```shell
-# ローカルプレビュー（http://127.0.0.1:8000）
-pnpm run mkdocs
-```
-
-### Pull Request作成前チェック
-
-文書のリンク切れや、ドキュメント品質をチェックする。
-
-```shell
-# 本番ビルド
-pnpm run mkdocs:build
-
-# ドキュメント品質チェック（textlint）
-pnpm run lint:text
-
-# ドキュメント品質チェック（自動修正）
-pnpm run lint:text:fix
-```
-
-### PDF生成
-
-#### Windows
-
-```shell
-pnpm run mkdocs:pdf
-```
-
-## 実行コマンドの補足
-
-MkDocsや環境同期は `pnpm` のスクリプトから実行する。内部では `uv` を呼び出すファサードになっているため、`pnpm` から統一的に操作できる。
