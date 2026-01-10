@@ -5,6 +5,10 @@
   "packageManager": "pnpm@10.27.0",
   "description": "仕様駆動開発時代のドキュメント基盤",
   "scripts": {
+    "python:sync": "uv sync",
+    "mkdocs": "uv run mkdocs serve",
+    "mkdocs:build": "uv run mkdocs build",
+    "mkdocs:pdf": "node scripts/mkdocs-pdf.mjs",
     "lint:text": "textlint \"**/*.md\"",
     "lint:text:fix": "textlint --fix \"**/*.md\""
   },

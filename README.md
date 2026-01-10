@@ -18,10 +18,9 @@ MkDocs + Material for MkDocsを使用したドキュメント基盤である。M
 事前に以下のソフトウェアが利用可能な状態にしておくこと。
 
 - Python 3.13+
-- uv（Pythonパッケージマネージャー）
-- [Node.js](https://nodejs.org/)
-- [pnpm](https://pnpm.io/ja/installation)
-- [ni](https://github.com/antfu-collective/ni)
+- uv 0.9.17+
+- Node.js 24.12.0+
+- pnpm 10.27.0+
 
 ## 環境構築
 
@@ -51,7 +50,7 @@ brew install python pango libffi
 
 ```shell
 pnpm install
-uv sync
+pnpm run python:sync
 ```
 
 ### VS Code拡張
@@ -70,7 +69,7 @@ MkDocsを起動してプレビューを確認しながら文書を記述する�
 
 ```shell
 # ローカルプレビュー（http://127.0.0.1:8000）
-uv run mkdocs serve
+pnpm run mkdocs
 ```
 
 ### Pull Request作成前チェック
@@ -79,7 +78,7 @@ uv run mkdocs serve
 
 ```shell
 # 本番ビルド
-uv run mkdocs build
+pnpm run mkdocs:build
 
 # ドキュメント品質チェック（textlint）
 pnpm run lint:text
@@ -92,12 +91,10 @@ pnpm run lint:text:fix
 
 #### Windows
 
-```powershell
-$env:MKDOCS_PDF=1; uv run mkdocs build
+```shell
+pnpm run mkdocs:pdf
 ```
 
-#### Linux & macOS
+## 実行コマンドの補足
 
-```bash
-MKDOCS_PDF=1 uv run mkdocs build
-```
+MkDocsや環境同期は `pnpm` のスクリプトから実行する。内部では `uv` を呼び出すファサードになっているため、`pnpm` から統一的に操作できる。
