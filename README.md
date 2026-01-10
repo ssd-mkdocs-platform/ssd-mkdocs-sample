@@ -11,8 +11,10 @@ Markdown文書を静的サイトジェネレーターでHTMLに変換・公開�
 - GitHub Pages*1 もしくはAzure Static Web Apps（以降SWA）による正式文書公開
 - Pull Request時にSWAでのプレビュー
 - GitHubリポジトリの権限に応じたセキュリティ管理*1
+- GitHub Discussionsを通じた新規ユーザーへの招待・承認フロー*2
 
 *1: GitHub Pagesでリポジトリ権限に応じた閲覧制御を行うには、GitHub Enterpriseプランが必要
+*2: SWAへのアクセス権限はGitHub Discussionsの招待を承認することで付与される
 
 ## 技術スタック
 
