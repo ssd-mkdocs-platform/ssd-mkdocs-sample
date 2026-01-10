@@ -18,6 +18,8 @@ nav:
 theme:
   name: material
   language: ja
+  features:
+    - content.code.copy
 
 extra_css:
   - stylesheets/pdf-fixes.css
