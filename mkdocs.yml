@@ -49,7 +49,7 @@ watch:
 plugins:
   - search
   - mermaid-to-svg:
-      enabled_if_env: ENABLE_PDF_EXPORT
+      enabled_if_env: RENDER_SVG
       image_id_enabled: true
       image_id_prefix: mermaid-diagram
       # Disable HTML labels for PDF compatibility
@@ -60,11 +60,10 @@ plugins:
         class:
           htmlLabels: false
   - svg-to-png:
-      enabled_if_env: ENABLE_PDF_EXPORT
+      enabled_if_env: RENDER_PNG
   - to-pdf:
-      enabled_if_env: ENABLE_PDF_EXPORT
       cover_subtitle: 'ドキュメンテーション戦略'
       toc_title: 目次
       toc_level: 3
       output_path: pdf/ドキュメンテーション戦略.pdf
-      enabled_if_env: MKDOCS_PDF
+      enabled_if_env: ENABLE_PDF

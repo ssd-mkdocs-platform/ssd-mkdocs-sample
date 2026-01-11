@@ -63,13 +63,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk fonts-noto-cjk-extra
 
-      - name: Build site (PDF enabled)
+      - name: Build site (Web)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         env:
-          MKDOCS_PDF: "1"
+          RENDER_SVG: "1"
         run: uv run mkdocs build
 
-      - name: Build site
+      - name: Build site (PDF)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          RENDER_SVG: "1"
+          RENDER_PNG: "1"
+          ENABLE_PDF: "1"
+        run: |
+          # PDF生成用に別ディレクトリへビルド
+          uv run mkdocs build -d site-pdf
+          # 生成されたPDFをWeb用ディレクトリへコピー
+          mkdir -p site/pdf
+          cp site-pdf/pdf/*.pdf site/pdf/
+
+      - name: Build site (Preview)
         if: github.ref != 'refs/heads/main' || github.event_name != 'push'
         run: uv run mkdocs build
 

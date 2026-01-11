@@ -32,5 +32,8 @@
         ],
         "textlint.configPath": ".textlintrc.json",
         "textlint.autoFixOnSave": false,
-        "textlint.run": "onType"
+        "textlint.run": "onType",
+        "chat.tools.terminal.autoApprove": {
+                "pnpm": true
+        }
 }
