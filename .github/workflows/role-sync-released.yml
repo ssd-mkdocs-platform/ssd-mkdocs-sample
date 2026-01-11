@@ -2,22 +2,34 @@ name: Sync Role
 
 on:
   workflow_dispatch:
+    inputs:
+      discussion_category:
+        description: 'Discussion カテゴリ名'
+        required: false
+        default: 'Invitation'
+        type: string
   schedule:
     - cron: '0 3 * * 1'
 
+concurrency:
+  group: role-sync
+  cancel-in-progress: false
+
 permissions:
-  id-token: write
   contents: read
-  discussions: write
 
 env:
   SWA_NAME: ${{ vars.AZURE_SWA_NAME }}
   SWA_RG: ${{ vars.AZURE_SWA_RESOURCE_GROUP }}
-  DISCUSSION_CATEGORY: Invitation
+  DISCUSSION_CATEGORY: ${{ inputs.discussion_category || 'Invitation' }}
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      discussions: write
     steps:
       - name: GitHub App トークンの生成
         id: app-token
@@ -35,6 +47,11 @@ jobs:
   sync-swa-roles:
     needs: cleanup
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      discussions: write
+      id-token: write
     steps:
       - name: GitHub App トークンの生成
         id: app-token
