@@ -50,18 +50,6 @@ RENDER_SVG=1 RENDER_PNG=1 ENABLE_PDF=1 uv run mkdocs build
 pnpm mkdocs:pdf
 ```
 
-## Linting
-
-```bash
-# Run textlint on docs
-pnpm lint:text
-
-# Auto-fix textlint issues
-pnpm lint:text:fix
-```
-
-textlint enforces である調, sentence limits, spacing rules, and terminology consistency. See `.textlintrc.json` for configuration.
-
 ## Project Structure
 
 - `docs/` — Markdown source for MkDocs site; add `index.md` per section

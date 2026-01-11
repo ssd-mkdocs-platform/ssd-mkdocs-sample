@@ -63,9 +63,12 @@ paths:
 - ゼロ幅スペース使用禁止
 - 康煕部首使用禁止
 
-## 検証コマンド
+## Linting
 
 ```bash
+# Run textlint on docs
 pnpm lint:text
+
+# Auto-fix textlint issues
 pnpm lint:text:fix
 ```
