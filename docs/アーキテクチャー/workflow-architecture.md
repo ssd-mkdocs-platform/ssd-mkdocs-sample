@@ -160,7 +160,7 @@ flowchart TD
 | Azure Static Web Apps へデプロイ | サイトをデプロイ | - |
 | GitHub Pages 用アーティファクトのアップロード | Pages 用アーティファクト | main + push 時のみ |
 
-#### deploy-github-pages ジョブ
+#### deploy-GitHub-pages ジョブ
 
 **依存**: `build` ジョブ完了後  
 **実行条件**: main ブランチへの push 時のみ
