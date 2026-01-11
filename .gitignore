@@ -1,6 +1,6 @@
 # User-specific ignores
 sitecustomize.py
-/docs/assets/images/
+/docs/assets/
 
 # Claude Code
 .claude/settings.local.json

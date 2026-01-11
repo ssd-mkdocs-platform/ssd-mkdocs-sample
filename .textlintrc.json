@@ -14,6 +14,10 @@
         "strict": false,
         "allow": ["も", "や", "か"],
         "separatorChars": ["、", "。", "?", "!", "？", "！", "「", "」"]
+      },
+      "ja-no-mixed-period": {
+        "allowPeriodInList": false,
+        "forcePeriodInList": false
       }
     },
     "preset-ja-spacing": {
@@ -21,6 +25,7 @@
       "ja-space-around-code": false
     },
     "preset-jtf-style": {
+      "1.1.3.箇条書き": false,
       "1.2.1.句点(。)と読点(、)": true,
       "1.2.2.ピリオド(.)とカンマ(,)": true,
       "2.1.8.算用数字": true,

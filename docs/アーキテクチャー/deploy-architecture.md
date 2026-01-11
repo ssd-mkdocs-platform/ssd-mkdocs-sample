@@ -11,23 +11,26 @@ title: デプロイ構成
 本システムは GitHub と Azure を組み合わせたハイブリッド構成で、以下の特徴を持つ。
 
 - **デュアルデプロイ**: GitHub Pages と Azure Static Web Apps（SWA）への同時デプロイ
-- **PRプレビュー**: Pull Request 作成時に Azure SWA でプレビュー環境を自動生成
+- **役割の分離**: PRプレビューには SWA、正式公開（マージ後）には GitHub Pages を使用
+- **スケーラビリティ**: SWA のロール認証制限（25人）を補うため、広範な閲覧には Pages を活用
 - **OIDC認証**: GitHub Actions から Azure へのパスワードレス認証
-- **ロールベースアクセス制御**: GitHub リポジトリ権限に基づく閲覧制御（SWA）
+- **ロールベースアクセス制御**: リポジトリ権限に基づく閲覧制御（SWA および Enterprise 版 Pages）
+- **招待管理**: GitHub Discussions を活用した閲覧権限の配布と承認フロー（SWA用）
+- **最適化されたビルド**: Web 表示用には軽量な SVG、PDF 生成用には互換性の高い PNG を使い分け
 
 ## 配置モデル
 
 ```mermaid
 flowchart TB
     subgraph Clients["クライアント"]
-        Browser["ブラウザ"]
         Developer["開発者"]
     end
 
     subgraph GitHub["GitHub"]
         subgraph Repository["リポジトリ"]
             Source["ソースコード<br/>docs/ | mkdocs.yml"]
-            Workflows["GitHub Actions<br/>ワークフロー"]
+            WF_Deploy["Deploy Site"]
+            WF_Sync["Sync Role"]
         end
 
         subgraph GitHubServices["GitHub サービス"]
@@ -35,44 +38,38 @@ flowchart TB
             Discussions["GitHub Discussions"]
             GitHubApp["GitHub App"]
         end
-
-        subgraph GitHubConfig["設定"]
-            Secrets["Secrets"]
-            Variables["Variables"]
-        end
     end
 
     subgraph Azure["Azure"]
-        subgraph ResourceGroup["Resource Group<br/>rg-{repo}-prod"]
-            SWA["Static Web App<br/>stapp-{repo}-prod"]
-            ManagedIdentity["Managed Identity<br/>id-{repo}-prod"]
+        subgraph ResourceGroup["Resource Group"]
+            SWA["Static Web App"]
+            ManagedIdentity["Managed Identity"]
         end
 
         subgraph Security["セキュリティ"]
-            FederatedCredential["Federated Credential<br/>OIDC"]
-            RBAC["RBAC<br/>Contributor"]
+            FederatedCredential["Federated Credential"]
+            RBAC["RBAC"]
         end
     end
 
     Developer -->|git push| Source
-    Source -->|トリガー| Workflows
+    Source -->|トリガー| WF_Deploy
 
-    Workflows -->|デプロイ| Pages
-    Workflows -->|デプロイ| SWA
-    Workflows -->|OIDC認証| FederatedCredential
+    WF_Deploy -->|デプロイ| Pages
+    WF_Deploy -->|デプロイ| SWA
+    WF_Deploy -->|OIDC認証| FederatedCredential
+
+    WF_Sync -->|OIDC認証| FederatedCredential
+    WF_Sync -->|トークン生成| GitHubApp
 
     FederatedCredential -->|検証| ManagedIdentity
     ManagedIdentity -->|権限| RBAC
     RBAC -->|操作| SWA
 
-    GitHubApp -->|API| Discussions
-    Workflows -->|トークン生成| GitHubApp
+    WF_Sync -->|招待URL登録| Discussions
 
-    Secrets -->|認証情報| Workflows
-    Variables -->|設定値| Workflows
-
-    Browser -->|閲覧<br/>パブリック| Pages
-    Browser -->|閲覧<br/>認証付き| SWA
+    Developer -->|閲覧<br/>認証付き| Pages
+    Developer -->|閲覧<br/>認証付き| SWA
 ```
 
 ## コンポーネント詳細
@@ -82,12 +79,11 @@ flowchart TB
 | リソース | 用途 |
 |----------|------|
 | リポジトリ | Markdown ソース、MkDocs 設定、ワークフロー定義を格納 |
-| GitHub Actions | CI/CD パイプライン。ビルド・デプロイ・ロール同期を実行 |
-| GitHub Pages | 静的サイトのパブリック公開（Enterprise で認証制御可能） |
-| GitHub Discussions | SWA の招待管理。閲覧権限のリクエストを受け付け |
+| Deploy Site | CI/CD パイプライン。ビルド・デプロイを実行 |
+| Sync Role | ロール同期ジョブ。閲覧権限の管理を自動化 |
+| GitHub Pages | 静的サイトのホスティング。Private リポジトリ + Enterprise で認証制御可能 |
+| GitHub Discussions | SWA の招待管理。Sync Role が生成した招待 URL を登録 |
 | GitHub App | Discussions API への書き込み権限を持つアプリケーション |
-| Secrets | `AZURE_SWA_API_TOKEN`, `ROLE_SYNC_APP_PRIVATE_KEY` |
-| Variables | `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AZURE_SWA_NAME`, `AZURE_SWA_RESOURCE_GROUP`, `ROLE_SYNC_APP_ID` |
 
 ### Azure 側リソース
 
@@ -107,7 +103,7 @@ flowchart TB
 sequenceDiagram
     participant Dev as 開発者
     participant GH as GitHub
-    participant Actions as GitHub Actions
+    participant Actions as Deploy Site
     participant SWA as Azure SWA
     participant Pages as GitHub Pages
 
@@ -115,7 +111,13 @@ sequenceDiagram
     GH->>Actions: ワークフロー起動
 
     Actions->>Actions: uv sync
-    Actions->>Actions: mkdocs build<br/>(PDF有効)
+
+    rect rgb(240, 240, 240)
+        Note over Actions: デュアルビルド戦略
+        Actions->>Actions: Web用ビルド (MermaidをSVG化)
+        Actions->>Actions: PDF用ビルド (SVG経由でPNG化)
+        Actions->>Actions: 成果物を統合 (PDFをWeb用へ追加)
+    end
 
     par デュアルデプロイ
         Actions->>SWA: アーティファクトをアップロード
@@ -131,13 +133,13 @@ sequenceDiagram
 sequenceDiagram
     participant Dev as 開発者
     participant GH as GitHub
-    participant Actions as GitHub Actions
+    participant Actions as Deploy Site
     participant SWA as Azure SWA
 
     Dev->>GH: Pull Request 作成
     GH->>Actions: ワークフロー起動
 
-    Actions->>Actions: mkdocs build
+    Actions->>Actions: mkdocs build<br/>(変換なし)
     Actions->>SWA: プレビュー環境にデプロイ
     SWA-->>GH: プレビューURLをコメント
 
@@ -151,7 +153,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Schedule as スケジュール<br/>(毎週月曜 12:00 JST)
-    participant Actions as GitHub Actions
+    participant Actions as Sync Role
     participant App as GitHub App
     participant Discussions as GitHub Discussions
     participant Entra as Microsoft Entra ID
@@ -169,6 +171,8 @@ sequenceDiagram
 
     Actions->>SWA: ロール情報を同期
     Note over SWA: GitHub権限に基づき<br/>SWAロールを更新
+
+    Actions->>Discussions: 招待URLを登録
 ```
 
 ## 認証・認可モデル
@@ -180,7 +184,7 @@ GitHub Actions から Azure への認証には OIDC（OpenID Connect）を使用
 ```mermaid
 flowchart LR
     subgraph GitHub
-        Actions["GitHub Actions"]
+        WF["Deploy Site / Sync Role"]
     end
 
     subgraph Azure
@@ -189,10 +193,10 @@ flowchart LR
         SWA["Static Web App"]
     end
 
-    Actions -->|1. OIDC トークン| Entra
+    WF -->|1. OIDC トークン| Entra
     Entra -->|2. 検証| MI
-    MI -->|3. アクセストークン| Actions
-    Actions -->|4. API 呼び出し| SWA
+    MI -->|3. アクセストークン| WF
+    WF -->|4. API 呼び出し| SWA
 ```
 
 **信頼関係の設定**:
@@ -207,9 +211,9 @@ Azure Static Web Apps は組み込みの認証機能を提供する。
 
 ```mermaid
 flowchart LR
-    User["ユーザー"] -->|1. アクセス| SWA["Static Web App"]
-    SWA -->|2. 認証要求| AAD["Microsoft Entra ID<br/>/ GitHub / etc."]
-    AAD -->|3. 認証完了| SWA
+    Dev["開発者"] -->|1. アクセス| SWA["Static Web App"]
+    SWA -->|2. 認証要求| Entra["Microsoft Entra ID / GitHub"]
+    Entra -->|3. 認証完了| SWA
     SWA -->|4. ロール確認| Roles["ロール設定"]
     Roles -->|5. 認可| Content["コンテンツ"]
 ```
@@ -218,8 +222,10 @@ flowchart LR
 
 | 項目 | GitHub Pages | Azure Static Web Apps |
 |------|--------------|----------------------|
+| 用途 | **正式公開（マージ後）** | **PRプレビュー / 開発用** |
 | URL | `{owner}.github.io/{repo}` | `*.azurestaticapps.net` |
-| 認証 | なし（Enterprise で可能） | Microsoft Entra ID / GitHub / カスタム |
+| 認証 | リポジトリ権限（Enterprise） | Microsoft Entra ID / GitHub / カスタム |
+| 閲覧人数制限 | **制限なし**（リポジトリ権限に従う） | **最大 25 人**（カスタムロール使用時） |
 | PRプレビュー | なし | あり（自動生成） |
 | カスタムドメイン | 可能 | 可能 |
 | 料金 | 無料 | Free / Standard |
