@@ -6,6 +6,12 @@ applyTo: "docs/**/*.md"
 
 本プロジェクトのドキュメント記述ルール。手動で確認する項目には（手動）を付ける。
 
+## Core Mandates
+
+- 文書更新後は必ず校正とビルドを実行すること
+- 校正: pnpm lint:text（自動修正はpnpm lint:text:fix）
+- ビルド: pnpm mkdocs:build
+
 ## 文体
 
 - である調への統一（見出し・本文・箇条書きすべて）
@@ -61,13 +67,3 @@ applyTo: "docs/**/*.md"
 - 制御文字使用禁止
 - ゼロ幅スペース使用禁止
 - 康煕部首使用禁止
-
-## Linting
-
-```bash
-# Run textlint on docs
-pnpm lint:text
-
-# Auto-fix textlint issues
-pnpm lint:text:fix
-```

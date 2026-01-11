@@ -5,7 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Core Mandates
 
 1. **Language**: Think in English. Interact with users in Japanese. Commit messages and PR descriptions must be in Japanese.
-2. **TDD**: Follow t-wada style TDD strictly—RED-GREEN-REFACTOR without exception.
+2. **TDD**: Follow t-wada style TDD strictly?RED-GREEN-REFACTOR without exception.
+3. **Docs**: 文書を記述したら `pnpm lint:text` と `pnpm mkdocs:build` を実行する。
 
 ## Rules
 
@@ -13,7 +14,7 @@ Project rules are defined in `.claude/rules/`.
 
 | Rule | Scope | Notes |
 |------|-------|-------|
-| `.claude/rules/writing-guide.md` | `docs/**/*.md` | Manual checks are marked with （手動）. Update both files together. |
+| `.claude/rules/writing-guide.md` | `docs/**/*.md` | Manual checks are marked with БiОшУоБj. Update both files together. |
 
 ## Agent Skills
 
@@ -23,7 +24,7 @@ Project-specific Agent Skills are defined in `.claude/skills/`. Claude automatic
 |-------|-------------|
 | `creating-issues` | Create GitHub Issues interactively |
 | `creating-prs` | Analyze diff from main branch and create PR |
-| `starting-issues` | Start issue work (create branch → Plan mode) |
+| `starting-issues` | Start issue work (create branch Би Plan mode) |
 
 ## Build & Development Commands
 
@@ -64,8 +65,8 @@ pnpm mkdocs:pdf
 
 | Variable | Purpose |
 |----------|---------|
-| `RENDER_SVG` | Enable Mermaid → SVG conversion |
-| `RENDER_PNG` | Enable SVG → PNG conversion (for PDF) |
+| `RENDER_SVG` | Enable Mermaid Би SVG conversion |
+| `RENDER_PNG` | Enable SVG Би PNG conversion (for PDF) |
 | `ENABLE_PDF` | Enable PDF generation |
 
 ## Coding Conventions
@@ -80,6 +81,9 @@ pnpm mkdocs:pdf
 - **textlint.yml** — Runs textlint on `docs/**/*.md` changes
 - **deploy-site.yml** — Builds and deploys; Azure SWA for preview, GitHub Pages for production
 - **close-preview.yml** — Deletes Azure SWA preview environments on PR close
+
+
+
 
 
 

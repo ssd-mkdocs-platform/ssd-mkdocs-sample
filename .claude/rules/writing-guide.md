@@ -7,6 +7,12 @@ paths:
 
 本プロジェクトのドキュメント記述ルール。手動で確認する項目には（手動）を付ける。
 
+## Core Mandates
+
+- 文書更新後は必ず校正とビルドを実行すること
+- 校正： pnpm lint:text（自動修正はpnpm lint:text:fix）
+- ビルド： pnpm mkdocs:build
+
 ## 文体
 
 - である調への統一（見出し・本文・箇条書きすべて）
