@@ -6,7 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 1. **Language**: Think in English. Interact with users in Japanese. Commit messages and PR descriptions must be in Japanese.
 2. **TDD**: Follow t-wada style TDD strictly—RED-GREEN-REFACTOR without exception.
-3. **Writing Style**: Follow `docs/writing-guide.md`—である調 throughout, 体言止め for bullet points, maximum 150 chars per sentence.
 
 ## Rules
 
@@ -30,23 +29,16 @@ Project-specific Agent Skills are defined in `.claude/skills/`. Claude automatic
 
 ```bash
 # Install dependencies
-uv sync
+pnpm python:sync
 pnpm install
 
 # Local preview (live reload at http://127.0.0.1:8000)
-uv run mkdocs serve
+pnpm mkdocs
 
 # Production build (basic)
-uv run mkdocs build
-
-# SVG build (Mermaid → SVG conversion)
-RENDER_SVG=1 uv run mkdocs build
-# or
-pnpm mkdocs:build:svg
+pnpm mkdocs:build
 
 # PDF build (requires GTK runtime)
-RENDER_SVG=1 RENDER_PNG=1 ENABLE_PDF=1 uv run mkdocs build
-# or
 pnpm mkdocs:pdf
 ```
 
@@ -81,10 +73,18 @@ pnpm mkdocs:pdf
 - Markdown: ATX headings, fenced code blocks with language hints, relative links within `docs/`
 - Filenames: lowercase with hyphens (e.g., `getting-started.md`)
 - YAML: two-space indentation; keep nav entries synchronized with files
-- Run `uv run mkdocs build` before committing to catch broken links or syntax errors
+- Run `pnpm mkdocs:build` before committing to catch broken links or syntax errors
 
 ## CI/CD
 
 - **textlint.yml** — Runs textlint on `docs/**/*.md` changes
 - **deploy-site.yml** — Builds and deploys; Azure SWA for preview, GitHub Pages for production
 - **close-preview.yml** — Deletes Azure SWA preview environments on PR close
+
+
+
+
+
+
+
+
