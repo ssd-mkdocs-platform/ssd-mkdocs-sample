@@ -6,41 +6,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 1. **Language**: Think in English. Interact with users in Japanese. Commit messages and PR descriptions must be in Japanese.
 2. **TDD**: Follow t-wada style TDD strictly—RED-GREEN-REFACTOR without exception.
+3. **Writing Style**: Follow `docs/writing-guide.md`—である調 throughout, 体言止め for bullet points, maximum 150 chars per sentence.
 
 ## Build & Development Commands
 
 ```bash
 # Install dependencies
 uv sync
+pnpm install
 
 # Local preview (live reload at http://127.0.0.1:8000)
 uv run mkdocs serve
 
-# Production build
+# Production build (basic)
 uv run mkdocs build
 
-# PDF build (requires GTK runtime and sets MKDOCS_PDF=1)
-MKDOCS_PDF=1 uv run mkdocs build
+# SVG build (Mermaid → SVG conversion)
+RENDER_SVG=1 uv run mkdocs build
+# or
+pnpm mkdocs:build:svg
+
+# PDF build (requires GTK runtime)
+RENDER_SVG=1 RENDER_PNG=1 ENABLE_PDF=1 uv run mkdocs build
+# or
+pnpm mkdocs:pdf
 ```
 
-## Testing
+## Linting
 
-```powershell
-# Run all Pester tests with code coverage
-./scripts/tests/Run-AllTests.ps1
+```bash
+# Run textlint on docs
+pnpm lint:text
 
-# Run a single test file
-Invoke-Pester -Path ./scripts/tests/Setup-Local.Tests.ps1
+# Auto-fix textlint issues
+pnpm lint:text:fix
 ```
 
-Tests use Pester. Production scripts live in `scripts/`, test files in `scripts/tests/` with `*.Tests.ps1` naming.
+textlint enforces である調, sentence limits, spacing rules, and terminology consistency. See `.textlintrc.json` for configuration.
 
 ## Project Structure
 
 - `docs/` — Markdown source for MkDocs site; add `index.md` per section
 - `mkdocs.yml` — Site config, navigation, plugins; update when adding pages
-- `scripts/` — PowerShell helper scripts (e.g., `Setup-Local.ps1` for tooling bootstrap)
-- `pyproject.toml`, `uv.lock` — Python dependencies managed by uv
+- `scripts/` — Node.js helper scripts for builds
+- `pyproject.toml`, `uv.lock` — Python dependencies (uv)
+- `package.json`, `pnpm-lock.yaml` — Node.js dependencies (pnpm) for textlint
 - `.claude/skills/` — Agent Skills for Claude Code
 
 ## Agent Skills
@@ -58,9 +68,17 @@ Project-specific Agent Skills are defined in `.claude/skills/`. Claude automatic
 - **MkDocs + Material for MkDocs** — Static site generator
 - **Mermaid** — Diagrams in Markdown (rendered via `mermaid-to-svg` plugin)
 - **Draw.io** — SVG diagrams (converted to PNG via `svg-to-png` plugin)
-- **WeasyPrint** — PDF generation (via `to-pdf` plugin, enabled by `MKDOCS_PDF` env var)
+- **WeasyPrint** — PDF generation (via `to-pdf` plugin)
 - **Playwright** — Browser automation for Mermaid rendering
-- **Marp** — Markdown presentations (requires Node.js)
+- **textlint** — Japanese text linting with JTF style guide
+
+## Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `RENDER_SVG` | Enable Mermaid → SVG conversion |
+| `RENDER_PNG` | Enable SVG → PNG conversion (for PDF) |
+| `ENABLE_PDF` | Enable PDF generation |
 
 ## Coding Conventions
 
@@ -71,13 +89,6 @@ Project-specific Agent Skills are defined in `.claude/skills/`. Claude automatic
 
 ## CI/CD
 
-- **ci-tests.yml** — Runs Pester tests on `scripts/**` changes (Windows runner)
-- **deploy-site.yml** — Builds and deploys to Azure Static Web Apps; PDF enabled only on main branch push
-
-## Environment Setup (Windows)
-
-Run as administrator:
-```powershell
-.\scripts\Setup-Local.ps1
-```
-Installs Python 3.13, uv, Node.js, Mermaid CLI, GTK+ Runtime, and project dependencies.
+- **textlint.yml** — Runs textlint on `docs/**/*.md` changes
+- **deploy-site.yml** — Builds and deploys; Azure SWA for preview, GitHub Pages for production
+- **close-preview.yml** — Deletes Azure SWA preview environments on PR close
