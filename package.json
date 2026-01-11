@@ -8,6 +8,7 @@
     "python:sync": "uv sync",
     "mkdocs": "uv run mkdocs serve --livereload",
     "mkdocs:build": "uv run mkdocs build",
+    "mkdocs:build:svg": "node scripts/mkdocs-svg.mjs",
     "mkdocs:pdf": "node scripts/mkdocs-pdf.mjs",
     "lint:text": "textlint \"docs/**/*.md\"",
     "lint:text:fix": "textlint --fix \"docs/**/*.md\""

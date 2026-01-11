@@ -16,8 +16,11 @@ pnpm run mkdocs
 文書のリンク切れや、ドキュメント品質をチェックする。
 
 ```shell
-# 本番ビルド
+# 簡易ビルド（PRプレビュー相当）
 pnpm run mkdocs:build
+
+# 本番Web用ビルド（MermaidのSVG化を含む）
+pnpm run mkdocs:build:svg
 
 # ドキュメント品質チェック（textlint）
 pnpm run lint:text
@@ -27,6 +30,8 @@ pnpm run lint:text:fix
 ```
 
 ## PDF生成
+
+正式公開版と同様に、Mermaid を PNG に変換して PDF を生成する。
 
 ### Windows
 
