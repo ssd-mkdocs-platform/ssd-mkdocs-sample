@@ -10,7 +10,7 @@ on:
       - 'uv.lock'
       - '.github/workflows/deploy-site.yml'
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
@@ -27,49 +27,48 @@ permissions:
 
 jobs:
   build:
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install pnpm
+      - name: pnpm のインストール
         uses: pnpm/action-setup@v4
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v3
+      - name: uv のセットアップ
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.13"
 
-      - name: Set up Node.js
+      - name: Node.js のセットアップ
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
 
-      - name: Install Mermaid CLI
+      - name: Mermaid CLI のインストール
         run: pnpm add -g @mermaid-js/mermaid-cli
 
-      - name: Sync dependencies
+      - name: 依存関係の同期
         run: uv sync
 
-      - name: Install Playwright browsers
+      - name: Playwright ブラウザのインストール
         run: uv run python -m playwright install chromium
 
-      - name: Install PDF dependencies
+      - name: PDF 依存関係のインストール
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           sudo apt-get update
           sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk fonts-noto-cjk-extra
 
-      - name: Build site (Web)
+      - name: サイトのビルド (Web)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         env:
           RENDER_SVG: "1"
         run: uv run mkdocs build
 
-      - name: Build site (PDF)
+      - name: サイトのビルド (PDF)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         env:
           RENDER_SVG: "1"
@@ -82,35 +81,11 @@ jobs:
           mkdir -p site/pdf
           cp site-pdf/pdf/*.pdf site/pdf/
 
-      - name: Build site (Preview)
+      - name: サイトのビルド (プレビュー)
         if: github.ref != 'refs/heads/main' || github.event_name != 'push'
         run: uv run mkdocs build
 
-      - name: Upload artifact for Azure
-        uses: actions/upload-artifact@v4
-        with:
-          name: site-azure
-          path: site/
-
-      - name: Upload artifact for GitHub Pages
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site/
-
-  deploy-azure:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: site-azure
-          path: site/
-
-      - name: Deploy to Azure Static Web Apps
+      - name: Azure Static Web Apps へデプロイ
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_API_TOKEN }}
@@ -121,6 +96,17 @@ jobs:
           output_location: ""
           skip_app_build: true
 
+      - name: GitHub Pages 用アーティファクトのアップロード
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+  # GitHub Pages へのデプロイは別ジョブとして分離
+  # 理由:
+  # 1. environment 設定により GitHub UI の Environments でデプロイ状況を追跡可能
+  # 2. デプロイ失敗時に build を再実行せずデプロイのみリトライ可能
+  # 3. GitHub 公式の推奨パターンに準拠
   deploy-github-pages:
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -129,16 +115,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
+      - name: GitHub Pages へデプロイ
         id: deployment
         uses: actions/deploy-pages@v4
 
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Close Pull Request
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_API_TOKEN }}
-          action: close

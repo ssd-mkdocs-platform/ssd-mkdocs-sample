@@ -232,5 +232,6 @@ flowchart LR
 
 ## 関連ドキュメント
 
+- [ワークフロー アーキテクチャ](workflow-architecture.md) - GitHub Actions ワークフローの詳細
 - [クラウド環境構築](../cloud-resources-setup.md) - Azure / GitHub リソースの構築手順
 - [テキスト校正](text-validation.md) - textlint による品質管理
