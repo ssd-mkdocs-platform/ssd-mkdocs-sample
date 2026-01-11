@@ -11,9 +11,10 @@ title: デプロイ構成
 本システムは GitHub と Azure を組み合わせたハイブリッド構成で、以下の特徴を持つ。
 
 - **デュアルデプロイ**: GitHub Pages と Azure Static Web Apps（SWA）への同時デプロイ
-- **役割の分離**: PRプレビューには SWA、正式公開（マージ後）には GitHub Pages を使用
+- **役割の分離**: 広範な閲覧は GitHub Pages、PRプレビューや限定配布は SWA を主に使用（同一成果物を両環境へ配布）
 - **スケーラビリティ**: SWA のロール認証制限（25人）を補うため、広範な閲覧には Pages を活用
-- **OIDC認証**: GitHub Actions から Azure へのパスワードレス認証
+- **OIDC認証**: Sync Role が OIDC で Azure にログインして SWA ロールを同期（Azure 資格情報の長期保存を回避）
+- **SWA API トークン**: Deploy Site / Close Preview が `AZURE_SWA_API_TOKEN` で SWA へデプロイ・プレビュー削除
 - **ロールベースアクセス制御**: リポジトリ権限に基づく閲覧制御（SWA および Enterprise 版 Pages）
 - **招待管理**: GitHub Discussions を活用した閲覧権限の配布と承認フロー（SWA用）
 - **最適化されたビルド**: Web 表示用には軽量な SVG、PDF 生成用には互換性の高い PNG を使い分け
@@ -30,6 +31,7 @@ flowchart TB
         subgraph Repository["リポジトリ"]
             Source["ソースコード<br/>docs/ | mkdocs.yml"]
             WF_Deploy["Deploy Site"]
+            WF_Close["Close Preview"]
             WF_Sync["Sync Role"]
         end
 
@@ -57,7 +59,11 @@ flowchart TB
 
     WF_Deploy -->|デプロイ| Pages
     WF_Deploy -->|デプロイ| SWA
-    WF_Deploy -->|OIDC認証| FederatedCredential
+    WF_Close -->|プレビュー削除| SWA
+
+    Secrets["GitHub Secrets<br/>AZURE_SWA_API_TOKEN"]
+    Secrets -->|トークン| WF_Deploy
+    Secrets -->|トークン| WF_Close
 
     WF_Sync -->|OIDC認証| FederatedCredential
     WF_Sync -->|トークン生成| GitHubApp
@@ -134,6 +140,7 @@ sequenceDiagram
     participant Dev as 開発者
     participant GH as GitHub
     participant Actions as Deploy Site
+    participant Close as Close Preview
     participant SWA as Azure SWA
 
     Dev->>GH: Pull Request 作成
@@ -144,9 +151,13 @@ sequenceDiagram
     SWA-->>GH: プレビューURLをコメント
 
     Dev->>GH: Pull Request マージ
-    GH->>Actions: close イベント
-    Actions->>SWA: プレビュー環境を削除
+    GH->>Close: close イベント
+    Close->>SWA: プレビュー環境を削除
 ```
+
+**注意**:
+
+- fork からの Pull Request では `AZURE_SWA_API_TOKEN` が利用できず、SWA のプレビュー作成/削除が失敗する可能性がある。SWA プレビューを有効にする場合は「同一リポジトリ内 PR」を前提とし、必要に応じてワークフロー側で fork PR をスキップする。
 
 ### ロール同期
 
@@ -179,12 +190,12 @@ sequenceDiagram
 
 ### OIDC フェデレーション
 
-GitHub Actions から Azure への認証には OIDC（OpenID Connect）を使用する。これによりシークレットの長期保存が不要となる。
+Sync Role の Azure への認証には OIDC（OpenID Connect）を使用する。これにより Azure 資格情報（クライアントシークレット等）の長期保存が不要となる。
 
 ```mermaid
 flowchart LR
     subgraph GitHub
-        WF["Deploy Site / Sync Role"]
+        WF["Sync Role"]
     end
 
     subgraph Azure
@@ -198,6 +209,10 @@ flowchart LR
     MI -->|3. アクセストークン| WF
     WF -->|4. API 呼び出し| SWA
 ```
+
+### SWA デプロイの認証
+
+SWA へのデプロイと PR プレビューの削除には `AZURE_SWA_API_TOKEN`（GitHub Secrets）を使用する。
 
 **信頼関係の設定**:
 
