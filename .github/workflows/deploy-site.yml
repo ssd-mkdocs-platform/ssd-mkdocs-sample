@@ -18,6 +18,15 @@ on:
       - 'uv.lock'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
+    inputs:
+      purpose:
+        description: '実行目的'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
 
 permissions:
   contents: read
@@ -28,6 +37,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # 本番デプロイ条件: main push または workflow_dispatch で production 選択
+      IS_PRODUCTION: ${{ (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.purpose == 'production') }}
+      # 同一リポジトリからの PR か（fork PR でない）
+      IS_SAME_REPO_PR: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,28 +62,30 @@ jobs:
           cache: "pnpm"
 
       - name: Mermaid CLI のインストール
+        if: env.IS_PRODUCTION == 'true'
         run: pnpm add -g @mermaid-js/mermaid-cli
 
       - name: 依存関係の同期
         run: uv sync
 
       - name: Playwright ブラウザのインストール
+        if: env.IS_PRODUCTION == 'true'
         run: uv run python -m playwright install chromium
 
       - name: PDF 依存関係のインストール
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: env.IS_PRODUCTION == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk fonts-noto-cjk-extra
 
       - name: サイトのビルド (Web)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: env.IS_PRODUCTION == 'true'
         env:
           RENDER_SVG: "1"
         run: uv run mkdocs build
 
       - name: サイトのビルド (PDF)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: env.IS_PRODUCTION == 'true'
         env:
           RENDER_SVG: "1"
           RENDER_PNG: "1"
@@ -82,10 +98,11 @@ jobs:
           cp site-pdf/pdf/*.pdf site/pdf/
 
       - name: サイトのビルド (プレビュー)
-        if: github.ref != 'refs/heads/main' || github.event_name != 'push'
+        if: env.IS_PRODUCTION != 'true'
         run: uv run mkdocs build
 
       - name: Azure Static Web Apps へデプロイ
+        if: env.IS_SAME_REPO_PR == 'true'
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_API_TOKEN }}
@@ -97,7 +114,7 @@ jobs:
           skip_app_build: true
 
       - name: GitHub Pages 用アーティファクトのアップロード
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: env.IS_PRODUCTION == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site/
@@ -109,7 +126,7 @@ jobs:
   # 3. GitHub 公式の推奨パターンに準拠
   deploy-github-pages:
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.purpose == 'production')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
