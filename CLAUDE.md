@@ -8,6 +8,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 2. **TDD**: Follow t-wada style TDD strictly—RED-GREEN-REFACTOR without exception.
 3. **Writing Style**: Follow `docs/writing-guide.md`—である調 throughout, 体言止め for bullet points, maximum 150 chars per sentence.
 
+## Rules
+
+Project rules are defined in `.claude/rules/`.
+
+| Rule | Scope | Notes |
+|------|-------|-------|
+| `.claude/rules/writing-guide.md` | `docs/**/*.md` | Manual checks are marked with （手動）. Update both files together. |
+
+## Agent Skills
+
+Project-specific Agent Skills are defined in `.claude/skills/`. Claude automatically uses these based on context.
+
+| Skill | Description |
+|-------|-------------|
+| `creating-issues` | Create GitHub Issues interactively |
+| `creating-prs` | Analyze diff from main branch and create PR |
+| `starting-issues` | Start issue work (create branch → Plan mode) |
+
 ## Build & Development Commands
 
 ```bash
@@ -52,16 +70,6 @@ textlint enforces である調, sentence limits, spacing rules, and terminology 
 - `pyproject.toml`, `uv.lock` — Python dependencies (uv)
 - `package.json`, `pnpm-lock.yaml` — Node.js dependencies (pnpm) for textlint
 - `.claude/skills/` — Agent Skills for Claude Code
-
-## Agent Skills
-
-Project-specific Agent Skills are defined in `.claude/skills/`. Claude automatically uses these based on context.
-
-| Skill | Description |
-|-------|-------------|
-| `creating-issues` | Create GitHub Issues interactively |
-| `creating-prs` | Analyze diff from main branch and create PR |
-| `starting-issues` | Start issue work (create branch → Plan mode) |
 
 ## Tech Stack
 
