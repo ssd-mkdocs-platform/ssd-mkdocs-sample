@@ -157,7 +157,7 @@ sequenceDiagram
 
 **注意**:
 
-- fork からの Pull Request では `AZURE_SWA_API_TOKEN` が利用できず、SWA のプレビュー作成/削除が失敗する可能性がある。SWA プレビューを有効にする場合は「同一リポジトリ内 PR」を前提とし、必要に応じてワークフロー側で fork PR をスキップする。
+- fork からの Pull Request では `AZURE_SWA_API_TOKEN` が利用できず、SWA のプレビュー作成/削除に失敗する可能性がある。SWA プレビューを有効にする場合は「同一リポジトリ内 PR」を前提とし、必要に応じてワークフロー側で fork PR をスキップする。
 
 ### ロール同期
 
