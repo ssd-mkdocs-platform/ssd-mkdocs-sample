@@ -18,7 +18,7 @@
 - textlintによる品質チェック・フィックス
 - ハイブリッド公開戦略：
     - **GitHub Pages**： 正式文書の公開用。GitHub Enterprise のリポジトリ権限により、社内の非開発者を含む広範なユーザー（人数制限なし）への認証付き公開を実現
-    - **Azure Static Web Apps (SWA)**： 開発・プレビュー用。Pull Request 時にプレビュー環境を自動生成。GitHub ActionsによるGitHubとSWAの権限の自動同期を提供
+    - **Azure Static Web Apps (SWA)**： 開発・プレビュー用。Pull Request 時にプレビュー環境を自動生成。GitHub ActionsによるGitHubとSWAの権限の自動同期を提供（オプション）
 - 静的サイト全体を1つのPDFにまとめて配布可能
 
 ## 技術スタック
