@@ -15,9 +15,6 @@ concurrency:
   group: role-sync
   cancel-in-progress: false
 
-permissions:
-  contents: read
-
 env:
   SWA_NAME: ${{ vars.AZURE_SWA_NAME }}
   SWA_RG: ${{ vars.AZURE_SWA_RESOURCE_GROUP }}
