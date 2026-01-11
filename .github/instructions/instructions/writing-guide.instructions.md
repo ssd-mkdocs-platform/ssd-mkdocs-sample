@@ -4,4 +4,4 @@ applyTo: "docs/**/*.md"
 
 # ドキュメント記述マニュアル
 
-@../../.claude/rules/writing-guide.md
+@../../../.claude/rules/writing-guide.md

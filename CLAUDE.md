@@ -6,7 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 1. **Language**: Think in English. Interact with users in Japanese. Commit messages and PR descriptions must be in Japanese.
 2. **TDD**: Follow t-wada style TDD strictly?RED-GREEN-REFACTOR without exception.
-3. **Docs**: 文書を記述したら `pnpm lint:text` と `pnpm mkdocs:build` を実行する。
 
 ## Rules
 
