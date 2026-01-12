@@ -7,25 +7,17 @@ globs: ["**/*"]
 
 # Project Overview
 
-## General Guidelines
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-- Use TypeScript for all new code
-- Follow consistent naming conventions
-- Write self-documenting code with clear variable and function names
-- Prefer composition over inheritance
-- Use meaningful comments for complex business logic
+## Core Mandates
 
-## Code Style
+1. **Language**: Think in English. Interact with users in Japanese. Commit messages and PR descriptions must be in Japanese.
+2. **TDD**: Follow t-wada style TDD strictly?RED-GREEN-REFACTOR without exception.
 
-- Use 2 spaces for indentation
-- Use semicolons
-- Use double quotes for strings
-- Use trailing commas in multi-line objects and arrays
+## Project Structure
 
-## Architecture Principles
-
-- Organize code by feature, not by file type
-- Keep related files close together
-- Use dependency injection for better testability
-- Implement proper error handling
-- Follow single responsibility principle
+- `../../docs/` — Markdown source for MkDocs site; add `index.md` per section
+- `../../mkdocs.yml` — Site config, navigation, plugins; update when adding pages
+- `../../scripts/` — Node.js helper scripts for builds
+- `../../pyproject.toml`, `../../uv.lock` — Python dependencies (uv)
+- `../../package.json`, `../../pnpm-lock.yaml` — Node.js dependencies (pnpm) for textlint

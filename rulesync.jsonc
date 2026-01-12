@@ -1,16 +1,14 @@
 {
   "targets": [
+    "antigravity",
     "copilot",
-    "cursor",
     "claudecode",
     "codexcli"
   ],
   "features": [
     "rules",
     "ignore",
-    "mcp",
-    "commands",
-    "subagents"
+    "mcp"
   ],
   "baseDirs": [
     "."
