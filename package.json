@@ -10,8 +10,8 @@
     "mkdocs:build": "uv run mkdocs build",
     "mkdocs:build:svg": "node scripts/mkdocs-svg.mjs",
     "mkdocs:pdf": "node scripts/mkdocs-pdf.mjs",
-    "lint:text": "textlint \"docs/**/*.md\"",
-    "lint:text:fix": "textlint --fix \"docs/**/*.md\""
+    "lint:text": "textlint \"**/*.md\"",
+    "lint:text:fix": "textlint --fix \"**/*.md\""
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.12.0",
