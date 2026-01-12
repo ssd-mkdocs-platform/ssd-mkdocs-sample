@@ -31,3 +31,4 @@
 | Playwright | Mermaidレンダリング用ブラウザ自動化 |
 | WeasyPrint | PDF生成 |
 | textlint | ドキュメント品質チェック |
+| Rulesync | AI開発ツール用ルール管理・生成 |
