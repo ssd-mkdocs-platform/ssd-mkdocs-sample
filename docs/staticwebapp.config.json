@@ -1,0 +1,22 @@
+{
+  "routes": [
+    {
+      "route": "/*",
+      "allowedRoles": ["github-admin", "github-maintain", "github-write"]
+    }
+  ],
+  "responseOverrides": {
+    "401": {
+      "redirect": "/.auth/login/github",
+      "statusCode": 302
+    },
+    "403": {
+      "rewrite": "/403.html",
+      "statusCode": 403
+    }
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY"
+  }
+}
