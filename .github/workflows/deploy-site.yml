@@ -82,9 +82,7 @@ jobs:
           sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk fonts-noto-cjk-extra
 
       - name: Marp CLI を使ってスライドをビルド
-        run: |
-          cd docs/スライド
-          pnpm exec marp -c .marprc.yml -I . -o .
+        run: pnpm exec marp -c docs/スライド/.marprc.yml -I docs/スライド -o docs/スライド
 
       - name: サイトのビルド (Web)
         if: env.IS_PRODUCTION == 'true'
