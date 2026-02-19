@@ -1,0 +1,7 @@
+# Marp CLI設定ファイル
+
+# カスタムテーマを指定
+themeSet: theme
+
+# 出力形式
+html: true

@@ -65,6 +65,9 @@ jobs:
         if: env.IS_PRODUCTION == 'true'
         run: pnpm add -g @mermaid-js/mermaid-cli
 
+      - name: Install Marp CLI
+        run: pnpm add -g @marp-team/marp-cli
+
       - name: 依存関係の同期
         run: uv sync
 
@@ -77,6 +80,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 libffi-dev fonts-noto-cjk fonts-noto-cjk-extra
+
+      - name: Marp CLI を使ってスライドをビルド
+        run: |
+          cd docs/スライド
+          marp -c .marprc.yml -I . -o .
 
       - name: サイトのビルド (Web)
         if: env.IS_PRODUCTION == 'true'
