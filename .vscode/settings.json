@@ -39,5 +39,8 @@
   "chat.tools.terminal.autoApprove": {
     "pnpm": true
   },
-  "chat.useAgentsMdFile": false
+  "chat.useAgentsMdFile": false,
+  "markdown.marp.themes": [
+    "./docs/スライド/theme/marp.css"
+  ]
 }

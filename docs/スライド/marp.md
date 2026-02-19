@@ -1,10 +1,17 @@
 ---
 title: Marp
+marp: true
+theme: custom
+paginate: true
+header: 'ヘッダーテキスト'
+footer: 'フッターテキスト'
 ---
 
 # Marp
 
 Marpはマークダウンからプレゼンテーション資料を作成するツールである。本プロジェクトではMkDocsと統合してWebで表示する。
+
+---
 
 ## 概要
 
@@ -16,6 +23,8 @@ MarpはMarkdown形式でスライドを記述し、HTML/PDF/PPTXなどに変換�
 - PDF出力はMkDocsのto-pdfプラグインで統合的に行う
 - スライド単体のPDF出力も可能
 
+---
+
 ## 基本構文
 
 ### スライドの区切り
@@ -23,9 +32,6 @@ MarpはMarkdown形式でスライドを記述し、HTML/PDF/PPTXなどに変換�
 スライドは`---`（水平線）で区切る。
 
 ```markdown
----
-marp: true
----
 
 # スライド1
 
@@ -36,13 +42,9 @@ marp: true
 # スライド2
 
 2枚目のスライドの内容
+```
 
 ---
-
-# スライド3
-
-3枚目のスライドの内容
-```
 
 ### フロントマター
 
@@ -58,7 +60,9 @@ footer: 'フッターテキスト'
 ---
 ```
 
-主な設定項目：
+---
+
+#### 主な設定項目：
 
 | 設定 | 説明 |
 |------|------|
@@ -68,6 +72,8 @@ footer: 'フッターテキスト'
 | `header` | ヘッダーテキスト |
 | `footer` | フッターテキスト |
 | `size` | スライドサイズ（16:9, 4:3） |
+
+---
 
 ## スタイリング
 
@@ -84,7 +90,11 @@ footer: 'フッターテキスト'
 中央寄せのリードスライド
 
 ---
+```
 
+---
+
+```markdown
 <!-- _backgroundColor: #123 -->
 <!-- _color: white -->
 # 背景色を変更
@@ -94,19 +104,17 @@ footer: 'フッターテキスト'
 ---
 ```
 
+---
+
 ### 画像の配置
 
 ```markdown
----
-
-# 画像の配置
 
 ![width:300px](../assets/images/my-diagram.drawio.svg)
 
 <!-- 背景画像として使用 -->
 ![bg right:40%](../assets/images/background.png)
 
----
 ```
 
 画像の指定方法：
@@ -115,40 +123,6 @@ footer: 'フッターテキスト'
 - `height:200px` - 高さを指定
 - `bg` - 背景画像として使用
 - `bg right:40%` - 右側40%に背景画像
-
-## サンプルスライド
-
-以下はMarpで作成したスライドの例である。
-
----
-marp: true
-theme: default
-paginate: true
----
-
-# プロジェクト概要
-
-仕様駆動開発時代のドキュメント基盤
-
----
-
-## 技術スタック
-
-- MkDocs + Material for MkDocs
-- Mermaid（ダイアグラム）
-- Draw.io（複雑な図）
-- Marp（プレゼンテーション）
-
----
-
-## ワークフロー
-
-```mermaid
-graph LR
-    A[Markdown作成] --> B[ローカルプレビュー]
-    B --> C[コミット]
-    C --> D[自動デプロイ]
-```
 
 ---
 
@@ -168,6 +142,8 @@ Marp for VS Code拡張を使用すると、エディター内でプレビュー�
 2. 拡張機能で「Marp for VS Code」を検索
 3. インストール
 
+---
+
 ## PDF出力
 
 ### MkDocs統合でのPDF
@@ -177,6 +153,8 @@ MkDocsサイト全体をPDF化する場合は、to-pdfプラグインを使用�
 ```bash
 MKDOCS_PDF=1 uv run mkdocs build
 ```
+
+---
 
 ### スライド単体のPDF
 
@@ -190,24 +168,15 @@ npm install -g @marp-team/marp-cli
 marp slides.md --pdf
 ```
 
+---
+
 ### HTMLに変換
 
 ```bash
 marp slides.md --html
 ```
 
-## ファイル配置
-
-Marpスライドはdocsディレクトリ内の任意の場所に配置できる。
-
-```
-docs/
-├── presentations/
-│   ├── project-overview.md
-│   └── technical-design.md
-└── samples/
-    └── marp.md
-```
+---
 
 ## 参考リンク
 
