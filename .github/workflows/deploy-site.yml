@@ -8,6 +8,8 @@ on:
       - 'mkdocs.yml'
       - 'pyproject.toml'
       - 'uv.lock'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/deploy-site.yml'
   pull_request:
     types: [opened, synchronize, reopened]
@@ -16,6 +18,8 @@ on:
       - 'mkdocs.yml'
       - 'pyproject.toml'
       - 'uv.lock'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
     inputs:
@@ -61,15 +65,11 @@ jobs:
           node-version: "20"
           cache: "pnpm"
 
-      - name: Mermaid CLI のインストール
-        if: env.IS_PRODUCTION == 'true'
-        run: pnpm add -g @mermaid-js/mermaid-cli
-
-      - name: Install Marp CLI
-        run: pnpm add -g @marp-team/marp-cli
+      - name: Node.js 依存関係のインストール
+        run: pnpm install --frozen-lockfile
 
       - name: 依存関係の同期
-        run: uv sync
+        run: uv sync --frozen
 
       - name: Playwright ブラウザのインストール
         if: env.IS_PRODUCTION == 'true'
@@ -84,7 +84,7 @@ jobs:
       - name: Marp CLI を使ってスライドをビルド
         run: |
           cd docs/スライド
-          marp -c .marprc.yml -I . -o .
+          pnpm exec marp -c .marprc.yml -I . -o .
 
       - name: サイトのビルド (Web)
         if: env.IS_PRODUCTION == 'true'
