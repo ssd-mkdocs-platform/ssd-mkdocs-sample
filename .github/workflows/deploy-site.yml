@@ -87,9 +87,11 @@ jobs:
       - name: サイトのビルド (Web)
         if: env.IS_PRODUCTION == 'true'
         env:
-          RENDER_SVG: "1"
+          RENDER_SVG: "1" # Mermaid
         run: uv run mkdocs build
 
+      # PDF内の画像はSVGのままだとPDF生成時に文字化けなどの問題が発生するため、PDF生成時のみPNGも出力する
+      # ただ、WebサイトはSVGで出力することで、拡大縮小などで画質が劣化しない為、サイトとPDFでビルドを分ける
       - name: サイトのビルド (PDF)
         if: env.IS_PRODUCTION == 'true'
         env:
