@@ -118,8 +118,9 @@ footer: 'フッターテキスト'
 
 ## サンプルスライド
 
-以下はMarpで作成したスライドの例である。
+[marp-sample.html](marp-sample.html)は、以下のテキストをMarkdownファイルとして保存し、Marpで作成したサンプルスライドをHTML形式に変換したものです。  
 
+```txt
 ---
 marp: true
 theme: default
@@ -141,24 +142,12 @@ paginate: true
 
 ---
 
-## ワークフロー
-
-```mermaid
-graph LR
-    A[Markdown作成] --> B[ローカルプレビュー]
-    B --> C[コミット]
-    C --> D[自動デプロイ]
-```
-
----
-
 ## まとめ
 
 - テキストベースでドキュメント管理
 - バージョン管理が容易
 - 自動ビルド・デプロイ
-
----
+```
 
 ## VS Code拡張
 
