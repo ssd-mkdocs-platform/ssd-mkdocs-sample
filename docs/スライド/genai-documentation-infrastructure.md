@@ -203,3 +203,30 @@ Markdownベースのドキュメント基盤を構築・運用してきました
 </div>
 
 --- 
+
+# デモンストレーション
+
+---
+
+## デモの流れ
+
+1. Markdown ファイルの作成・閲覧
+1. Mkdocs によるサイト閲覧・PDF出力
+1. Mermaid / draw.io による作図
+1. Copy To Markdown Excel アドインによる 表の管理
+1. ソース と ドキュメント の一元管理
+1. レビュー と ステージング環境
+1. CI / CD
+1. おすすめ３機能（MkDocs の検索 / Csv の埋め込み / Marp によるスライド作成）
+
+---
+
+## PDF 出力の流れ
+
+<div style="text-align: center">
+
+![PDF出力フロー h:450px](./pdf-flow.svg)
+
+</div>
+
+[ドキュメンテーション戦略.pdf](https://genai-mkdocs.github.io/genai-mkdocs-sample/pdf/ドキュメンテーション戦略.pdf)

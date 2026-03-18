@@ -71,3 +71,5 @@ plugins:
       toc_level: 3
       output_path: pdf/ドキュメンテーション戦略.pdf
       enabled_if_env: ENABLE_PDF
+  - table-reader:
+      enabled: true

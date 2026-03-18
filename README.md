@@ -2,6 +2,10 @@
 
 仕様駆動開発時代におけるドキュメント基盤テンプレート。
 
+- デモサイト
+    - [GitHub Pages](https://genai-mkdocs.github.io/genai-mkdocs-sample/)
+    - [Azure Static Web Apps](https://white-stone-0b8d2c100.4.azurestaticapps.net/)
+
 特徴：
 
 1. ヒューマン フレンドリー
