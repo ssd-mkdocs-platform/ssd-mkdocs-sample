@@ -8,9 +8,8 @@
 
 特徴：
 
-1. ヒューマン フレンドリー
-2. AI フレンドリー
-3. ポータブル
+1. ヒューマン & AIフレンドリー
+2. ポータブル
 
 人が書きやすく読みやすいドキュメントで、AIによる生成・レビュー・活用が容易で、かつPDF形式での配布も可能なドキュメント基盤を提供する。
 
@@ -29,9 +28,13 @@
 
 | 技術 | 用途 |
 |------|------|
+| Python + uv | MkDocs の実行環境と依存関係管理 |
 | MkDocs + Material for MkDocs | 静的サイトジェネレーター |
+| MkDocs プラグイン群 | Mermaid の SVG/PNG 変換、PDF 出力、表読込 |
+| Node.js + pnpm | Marp と textlint の実行基盤 |
 | Mermaid | Markdown内での図表作成 |
 | Draw.io | SVG図表作成 |
-| Playwright | Mermaidレンダリング用ブラウザ自動化 |
+| Marp | Markdownスライド作成 |
+| Playwright | Mermaid 変換時のブラウザ自動化 |
 | WeasyPrint | PDF生成 |
 | textlint | ドキュメント品質チェック |
