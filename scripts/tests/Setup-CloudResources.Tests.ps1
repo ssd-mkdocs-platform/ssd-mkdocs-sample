@@ -187,9 +187,9 @@ Describe 'Setup-CloudResources.ps1' {
         ($azCallLines | Where-Object { $_ -like 'role assignment create*' }).Count | Should -Be 2
         $global:GroupDeleteAttempts | Should -Be 1
         $global:GroupWaitAttempts | Should -Be 1
-        $ghCallLines | Should -Contain 'variable set AZURE_CLIENT_ID --body client-123 --repo nuitsjp/swa-github-role-sync-ops'
+        $ghCallLines | Should -Contain 'variable set AZURE_CLIENT_ID --body client-123 --repo genai-docs/swa-github-role-sync-ops'
         $azCallLines | Should -Contain "staticwebapp secrets list --name stapp-$repository-prod --resource-group rg-$repository-prod --query properties.apiKey -o tsv"
-        $ghCallLines | Should -Contain 'secret set AZURE_SWA_API_TOKEN --body api-key-000 --repo nuitsjp/swa-github-role-sync-ops'
+        $ghCallLines | Should -Contain 'secret set AZURE_SWA_API_TOKEN --body api-key-000 --repo genai-docs/swa-github-role-sync-ops'
     }
 
     It 'gh repo viewでOwner/Repositoryを解決する' {

@@ -63,7 +63,7 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: SWA ロールの同期
-        uses: nuitsjp/swa-github-role-sync@v1
+        uses: genai-docs/swa-github-role-sync@v1
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           swa-name: ${{ env.SWA_NAME }}
