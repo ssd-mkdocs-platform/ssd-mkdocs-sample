@@ -27,6 +27,12 @@ Draw.ioは以下のような場面で使用する。
 
 基本的な図（フローチャート、シーケンス図、状態遷移図など）は[Mermaid](mermaid.md)を使用すること。
 
+## サンプル
+
+以下はDraw.ioで作成した図の例である。
+
+![draw-io-sample.drawio.svg](draw-io-sample.drawio.svg)
+
 ## セットアップ
 
 ### VS Code拡張のインストール
