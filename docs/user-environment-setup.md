@@ -40,7 +40,7 @@ brew install python pango libffi
 
 ```shell
 pnpm install
-pnpm run python:sync
+uv sync
 ```
 
 ### VS Code拡張

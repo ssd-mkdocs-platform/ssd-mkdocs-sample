@@ -1,6 +1,9 @@
 {
   "name": "Spec Driven Docs Infra",
-  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22",

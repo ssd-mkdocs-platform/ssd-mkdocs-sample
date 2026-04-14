@@ -5,20 +5,26 @@ copyright: Copyright &copy; 2024 @nuits.jp
 
 nav:
   - ホーム: index.md
+  - ガイド:
+      - 利用方法: usage-guide.md
+      - ユーザー環境構築: user-environment-setup.md
+      - ドキュメント記述マニュアル: writing-guide.md
   - クラウド環境構築: cloud-resources-setup.md
   - アーキテクチャー:
       - 概要: アーキテクチャー/index.md
       - デプロイ構成: アーキテクチャー/deploy-architecture.md
+      - ワークフロー アーキテクチャ: アーキテクチャー/workflow-architecture.md
       - テキスト検証: アーキテクチャー/text-validation.md
   - サンプル:
       - 目次: サンプル/index.md
+      - Mermaid: サンプル/mermaid.md
       - Draw.io: サンプル/draw-io.md
       - Marp: サンプル/marp.md
+      - Marp サンプル: サンプル/marp-sample.md
   - スライド:
       - 一覧: スライド/index.md
       - 生成AI時代のドキュメント基盤: スライド/genai-documentation-infrastructure.md
       - Marp: スライド/marp.md
-      - Mermaid: サンプル/mermaid.md
 
 theme:
   name: material

@@ -111,6 +111,7 @@ jobs:
 
       - name: Azure Static Web Apps へデプロイ
         if: env.IS_SAME_REPO_PR == 'true'
+        continue-on-error: ${{ env.IS_PRODUCTION != 'true' }}
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_API_TOKEN }}
@@ -143,4 +144,3 @@ jobs:
       - name: GitHub Pages へデプロイ
         id: deployment
         uses: actions/deploy-pages@v4
-

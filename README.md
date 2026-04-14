@@ -33,13 +33,13 @@ VS Code の [Dev Containers](https://marketplace.visualstudio.com/items?itemName
 **前提条件：** Docker、VS Code、Dev Containers 拡張機能
 
 1. このリポジトリをクローン
-2. VS Code でフォルダを開く
+2. VS Code でフォルダーを開く
 3. 右下の通知、またはコマンドパレット（`Ctrl+Shift+P`）から **「Reopen in Container」** を選択
-4. 初回のみコンテナのビルドが実行される（10〜15分程度）
+4. 初回のみコンテナーのビルドが実行される（10〜15分程度）
 
-補足：このリポジトリでは Dev Container の Node feature に対して `installYarnUsingApt: false` を明示し、Yarn を APT リポジトリではなく Corepack 経由で扱う。これにより、外部 Yarn リポジトリの署名鍵欠落による `apt-get update` 失敗を回避する。
+補足：このリポジトリでは、OS パッケージと `uv` を [`.devcontainer/Dockerfile`](.devcontainer/Dockerfile) に含め、ワークスペース依存の初期化だけを [`.devcontainer/postCreate.sh`](.devcontainer/postCreate.sh) で実行する。さらに Dev Container の Node feature に対して `installYarnUsingApt: false` を明示し、Yarn を APT リポジトリではなく Corepack 経由で扱う。ビルド時には `Dockerfile` 側で残存する `yarn.list` も除去し、`apt-get update` が失敗しないようにしている。
 
-コンテナ起動後、ターミナルで以下のコマンドが利用できる：
+コンテナー起動後、ターミナルで以下のコマンドが利用できる：
 
 | コマンド | 内容 |
 |----------|------|
@@ -52,17 +52,10 @@ VS Code の [Dev Containers](https://marketplace.visualstudio.com/items?itemName
 
 ### Dev Container トラブルシュート
 
-`postCreateCommand` 実行時に以下のような Yarn APT 署名エラーが出る場合がある。
-
-```text
-W: GPG error: https://dl.yarnpkg.com/debian stable InRelease: The following signatures couldn't be verified because the public key is not available
-E: The repository 'https://dl.yarnpkg.com/debian stable InRelease' is not signed.
-```
-
-このリポジトリでは [.devcontainer/devcontainer.json](.devcontainer/devcontainer.json) で `installYarnUsingApt: false` を設定し、さらに [.devcontainer/postCreate.sh](.devcontainer/postCreate.sh) で残存する `yarn.list` を除去するようにしている。既存コンテナーで同様の状態に遭遇した場合は、以下のどちらかで復旧できる。
+このリポジトリでは [.devcontainer/devcontainer.json](.devcontainer/devcontainer.json) で `installYarnUsingApt: false` を設定し、[`.devcontainer/Dockerfile`](.devcontainer/Dockerfile) の先頭で残存する `yarn.list` を除去したうえで APT パッケージを導入している。既存コンテナーでセットアップが失敗した場合は、以下のどちらかで復旧できる。
 
 1. VS Code で **Dev Containers: Rebuild Container** を実行する
-2. コンテナー内で `bash .devcontainer/postCreate.sh` を再実行する
+2. 依存関係の同期だけをやり直したい場合は、コンテナー内で `bash .devcontainer/postCreate.sh` を再実行する
 
 ## 技術スタック
 
