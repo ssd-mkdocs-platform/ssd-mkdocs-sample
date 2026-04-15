@@ -1,14 +1,8 @@
 {
   "name": "Spec Driven Docs Infra",
   "build": {
-    "dockerfile": "Dockerfile",
+    "dockerfile": "../infra/Dockerfile.handson",
     "context": ".."
-  },
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "22",
-      "installYarnUsingApt": false
-    }
   },
   "containerEnv": {
     "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true",

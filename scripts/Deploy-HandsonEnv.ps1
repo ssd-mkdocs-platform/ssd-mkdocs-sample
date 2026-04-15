@@ -80,10 +80,8 @@ if ($SkipImageBuild) {
     Write-Host '[1/5] イメージビルドをスキップ'
 } else {
     Write-Host "[1/5] イメージをビルド・プッシュ中 ($imageRef)..."
-    docker build -t $imageRef -f (Join-Path $repoRoot 'infra/Dockerfile.handson') $repoRoot
-    if ($LASTEXITCODE -ne 0) { throw "イメージのビルドに失敗しました" }
-    docker push $imageRef
-    if ($LASTEXITCODE -ne 0) { throw "イメージのプッシュに失敗しました" }
+    & (Join-Path $PSScriptRoot 'Build-HandsonImage.ps1') -ImageTag $ImageTag -Push
+    if ($LASTEXITCODE -ne 0) { throw "イメージのビルド・プッシュに失敗しました" }
 }
 
 # ---------- サブスクリプション設定 ----------
