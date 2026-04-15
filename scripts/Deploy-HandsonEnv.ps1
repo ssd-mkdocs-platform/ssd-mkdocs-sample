@@ -75,13 +75,24 @@ Write-Host "  イメージ           : $imageRef"
 Write-Host '========================================='
 Write-Host ''
 
+# ---------- イメージビルド ----------
+if ($SkipImageBuild) {
+    Write-Host '[1/5] イメージビルドをスキップ'
+} else {
+    Write-Host "[1/5] イメージをビルド・プッシュ中 ($imageRef)..."
+    docker build -t $imageRef -f (Join-Path $repoRoot 'infra/Dockerfile.handson') $repoRoot
+    if ($LASTEXITCODE -ne 0) { throw "イメージのビルドに失敗しました" }
+    docker push $imageRef
+    if ($LASTEXITCODE -ne 0) { throw "イメージのプッシュに失敗しました" }
+}
+
 # ---------- サブスクリプション設定 ----------
-Write-Host '[1/5] サブスクリプションを設定中...'
+Write-Host '[2/5] サブスクリプションを設定中...'
 az account set --subscription $settings.subscriptionId
 if ($LASTEXITCODE -ne 0) { throw "サブスクリプションの設定に失敗しました" }
 
 # ---------- リソースグループ作成 ----------
-Write-Host '[2/5] リソースグループを作成中...'
+Write-Host '[3/5] リソースグループを作成中...'
 az group create `
     --name $rgName `
     --location $settings.location `
@@ -89,7 +100,7 @@ az group create `
 if ($LASTEXITCODE -ne 0) { throw "リソースグループの作成に失敗しました" }
 
 # ---------- 共有インフラデプロイ ----------
-Write-Host '[3/5] 共有インフラをデプロイ中（Log Analytics, Container Apps Environment）...'
+Write-Host '[4/5] 共有インフラをデプロイ中（Log Analytics, Container Apps Environment）...'
 $infraJson = az deployment group create `
     --resource-group $rgName `
     --template-file (Join-Path $repoRoot 'infra/main.bicep') `
@@ -101,17 +112,6 @@ $infraOutputs = ($infraJson | ConvertFrom-Json).properties.outputs
 $environmentId = $infraOutputs.environmentId.value
 
 Write-Host "  Environment: $environmentId"
-
-# ---------- イメージビルド ----------
-if ($SkipImageBuild) {
-    Write-Host '[4/5] イメージビルドをスキップ'
-} else {
-    Write-Host "[4/5] イメージをビルド・プッシュ中 ($imageRef)..."
-    docker build -t $imageRef -f (Join-Path $repoRoot 'infra/Dockerfile.handson') $repoRoot
-    if ($LASTEXITCODE -ne 0) { throw "イメージのビルドに失敗しました" }
-    docker push $imageRef
-    if ($LASTEXITCODE -ne 0) { throw "イメージのプッシュに失敗しました" }
-}
 
 # ---------- 参加者ごとの Container App デプロイ ----------
 Write-Host "[5/5] Container App を $UserCount 台デプロイ中..."

@@ -1,0 +1,7 @@
+{
+  "subscriptionId": "fc7753ed-2e69-4202-bb66-86ff5798b8d5",
+  "tenantId": "fe689afa-3572-4db9-8e8a-0f81d5a9d253",
+  "location": "japaneast",
+  "resourceGroup": "rg-genai-mkdocs-sample-hands-on",
+  "ghcrImage": "ghcr.io/genai-docs/handson-env"
+}
