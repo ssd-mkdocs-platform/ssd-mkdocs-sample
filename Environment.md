@@ -1,138 +1,115 @@
-# ハンズオン環境 現状整理
+# ハンズオン実行環境 アーキテクチャ
 
-> 確認日時: 2026-04-16
+## リソース一覧
 
-## 1. サブスクリプション情報
-
-| 項目 | 値 |
-|---|---|
-| サブスクリプション名 | Visual Studio Enterprise サブスクリプション |
-| サブスクリプションID | `fc7753ed-2e69-4202-bb66-86ff5798b8d5` |
-| テナントID | `fe689afa-3572-4db9-8e8a-0f81d5a9d253` |
-| 状態 | Enabled |
-
-## 2. リソースグループ
-
-| 項目 | 値 |
-|---|---|
-| 名前 | `rg-genai-mkdocs-sample-handson` |
-| リージョン | Japan East |
-| プロビジョニング状態 | Succeeded |
-
-## 3. リソース一覧
-
-| # | リソース名 | 種別 | 作成日時 |
-|---|---|---|---|
-| 1 | `acrgenaimkdocssamplefc7753ed` | Container Registry | 2026-04-15 00:21 |
-| 2 | `id-genai-mkdocs-sample-handson` | User Assigned Managed Identity | 2026-04-15 00:39 |
-| 3 | `workspace-rggenaimkdocssamplehandsonIi9M` | Log Analytics Workspace | 2026-04-15 00:40 |
-| 4 | `cae-genai-mkdocs-sample-handson` | Container Apps Environment | 2026-04-15 00:41 |
-| 5 | `handson-user-01` | Container App | 2026-04-15 00:45 |
-
-## 4. 各リソースの詳細
-
-### 4.1 Azure Container Registry
-
-| 項目 | 値 |
-|---|---|
-| 名前 | `acrgenaimkdocssamplefc7753ed` |
-| ログインサーバー | `acrgenaimkdocssamplefc7753ed.azurecr.io` |
-| SKU | Basic |
-| 管理者ユーザー | 無効 |
-| パブリックアクセス | 有効 |
-
-**リポジトリ:**
-
-| リポジトリ | タグ |
-|---|---|
-| `handson-env` | `c277e74` |
-
-### 4.2 User Assigned Managed Identity
-
-| 項目 | 値 |
-|---|---|
-| 名前 | `id-genai-mkdocs-sample-handson` |
-| Client ID | `25633b0b-60cd-44f0-9bb1-2885cdf1b326` |
-| Principal ID | `070bb510-40b7-47c4-ab80-d0d2f0ca6723` |
-
-**ロール割り当て:**
-
-| ロール | スコープ |
-|---|---|
-| AcrPull | `acrgenaimkdocssamplefc7753ed` (Container Registry) |
-
-### 4.3 Log Analytics Workspace
-
-| 項目 | 値 |
-|---|---|
-| 名前 | `workspace-rggenaimkdocssamplehandsonIi9M` |
-| SKU | PerGB2018 |
-| 保持期間 | 30日 |
-
-### 4.4 Container Apps Environment
-
-| 項目 | 値 |
-|---|---|
-| 名前 | `cae-genai-mkdocs-sample-handson` |
-| リージョン | Japan East |
-| デフォルトドメイン | `yellowplant-141d0d8a.japaneast.azurecontainerapps.io` |
-| 静的IP | `48.218.105.180` |
-| プロビジョニング状態 | Succeeded |
-
-### 4.5 Container App: handson-user-01
-
-| 項目 | 値 |
-|---|---|
-| 名前 | `handson-user-01` |
-| FQDN | `handson-user-01.yellowplant-141d0d8a.japaneast.azurecontainerapps.io` |
-| 実行状態 | Running |
-| ワークロードプロファイル | Consumption |
-| 最終更新 | 2026-04-15 11:52 |
-
-**コンテナ設定:**
-
-| 項目 | 値 |
-|---|---|
-| イメージ | `acrgenaimkdocssamplefc7753ed.azurecr.io/handson-env:c277e74` |
-| CPU | 1.0 vCPU |
-| メモリ | 2 GiB |
-| エフェメラルストレージ | 4 GiB |
-
-**Ingress設定:**
-
-| 項目 | 値 |
-|---|---|
-| 外部公開 | 有効 |
-| ターゲットポート | 8080 (code-server) |
-| トランスポート | Auto |
-| HTTP非暗号化通信 | 不許可 |
-
-**スケール設定:**
-
-| 項目 | 値 |
-|---|---|
-| 最小レプリカ数 | 1 |
-| 最大レプリカ数 | 1 |
-| クールダウン期間 | 300秒 |
-
-**環境変数:**
-
-| 変数名 | 値のソース |
-|---|---|
-| `PASSWORD` | シークレット `code-server-password` |
-
-**認証・レジストリ:**
-
-- マネージドID (`id-genai-mkdocs-sample-handson`) を使用してACRからイメージをプル
-
-## 5. 設計書との対応状況
-
-| 設計書の項目 | 状態 | 備考 |
+| リソース種別 | 数量 | 概略 |
 |---|---|---|
-| Azure Container Registry | 構築済み | Basic SKU、イメージ `handson-env:c277e74` がプッシュ済み |
-| Container Apps Environment | 構築済み | japaneast、Log Analytics連携済み |
-| Container App (参加者ごと) | 1台構築済み | `handson-user-01` がRunning状態 |
-| code-server (port 8080) | 構成済み | Ingressで外部公開、HTTPS |
-| パスワード認証 | 構成済み | シークレット `code-server-password` で設定 |
-| min-replicas=1 | 設定済み | スケールイン防止 |
-| マネージドIDによるACRプル | 構成済み | AcrPullロール割り当て済み |
+| Container Registry (Basic) | 1 | ハンズオン用コンテナイメージの格納先 |
+| User Assigned Managed Identity | 1 | Container Apps → ACR 間のパスワードレス認証 |
+| Log Analytics Workspace | 1 | コンテナログの収集・トラブルシューティング用 |
+| Container Apps Environment | 1 | 全参加者のコンテナが稼働する共有実行基盤 |
+| Container App | 参加者数 | 参加者ごとのcode-server環境（1 vCPU / 2 GiB） |
+
+## 全体像
+
+参加者がブラウザのみでハンズオン作業を行えるよう、Azure上にひとりひとり専用のコンテナ環境を提供する構成である。
+
+```
+参加者 (ブラウザ)
+    │
+    │ HTTPS (パスワード認証)
+    ▼
+┌─────────────────────────────────────────────────┐
+│  Container Apps Environment                      │
+│  (全参加者で共有する実行基盤)                      │
+│                                                  │
+│  ┌──────────┐ ┌──────────┐     ┌──────────┐     │
+│  │ user-01  │ │ user-02  │ ... │ user-N   │     │
+│  │          │ │          │     │          │     │
+│  │ code-    │ │ code-    │     │ code-    │     │
+│  │ server   │ │ server   │     │ server   │     │
+│  │ :8080    │ │ :8080    │     │ :8080    │     │
+│  └──────────┘ └──────────┘     └──────────┘     │
+│       │                                          │
+│       │ ログ収集                                  │
+│       ▼                                          │
+│  Log Analytics                                   │
+└─────────────────────────────────────────────────┘
+        ▲
+        │ イメージ取得 (Managed Identity 認証)
+        │
+   Container Registry
+   (ハンズオン用イメージを格納)
+```
+
+## 構成要素の役割
+
+### Container Registry
+
+ハンズオン用コンテナイメージの保管場所。code-server・MkDocs・VS Code拡張機能・ハンズオン資材をすべて含んだイメージを格納する。イメージタグにはGitコミットハッシュを使用し、どのリビジョンのソースから構築されたかを追跡できるようにしている。
+
+### Managed Identity
+
+Container AppsがContainer Registryからイメージを取得する際の認証手段。AcrPullロールのみを付与し、イメージの読み取り専用アクセスに制限している。パスワードやトークンをContainer Appの設定に埋め込む必要がなくなり、資格情報の漏洩リスクを排除する。
+
+### Log Analytics Workspace
+
+Container Apps Environmentのログ収集先。参加者のコンテナが起動しない、応答しないといった問題が発生した際に、ログを確認してトラブルシューティングを行うために使用する。
+
+### Container Apps Environment
+
+全参加者のContainer Appが稼働する共有実行基盤。ネットワーク・ログ収集・DNS解決などの基盤機能を提供する。各Container Appにはこの環境のドメインをベースとした一意のFQDNが割り当てられる。
+
+### Container App（参加者ごと）
+
+参加者ひとりにつき1台デプロイされるコンテナ。以下の特性を持つ。
+
+- **code-server（port 8080）** をIngressで外部HTTPS公開し、ブラウザからVS Code相当の操作環境を提供する
+- **パスワード認証**により、割り当てられた参加者のみがアクセスできる
+- **min-replicas=1** を設定し、スケールインによるコンテナ停止を防止する
+- 参加者がターミナルから`mkdocs serve`を起動し、コンテナ内部のport 8000でプレビューをSimple Browserから閲覧する（外部には公開しない）
+
+## デプロイの仕組み
+
+環境の構築は `scripts/Deploy-HandsonEnv.ps1` で一括実行する。内部では2段階のBicepテンプレートを使用している。
+
+1. **`infra/main.bicep`** — Container Registry・Managed Identity・Log Analytics・Container Apps Environmentの共有インフラをデプロイ
+2. **`infra/container-app.bicep`** — 参加者ごとのContainer Appをデプロイ（パスワードを個別生成）
+
+イメージのビルドは `az acr build` でContainer Registry上で実行し、ローカルのDocker環境を不要としている。
+
+## コスト見通し
+
+Visual Studio Enterpriseサブスクリプション付帯のAzureクレジット（$150/月 ≒ 24,000円/月）内での運用を前提とする。
+
+> 以下の円換算は $1 = 160円 で算出している。
+
+### 固定費（常時課金）
+
+| リソース | 概算 | 備考 |
+|---|---|---|
+| Container Registry (Basic) | 約800円/月 | イメージ保管。ハンズオン終了後に削除すれば課金停止 |
+
+### 従量課金（ハンズオン開催時のみ）
+
+| リソース | 単価 | 備考 |
+|---|---|---|
+| Container App (1 vCPU / 2 GiB) | 約10円/時間/台 | Consumptionプラン。稼働時間のみ課金 |
+
+### 想定シナリオ
+
+| 規模 | 時間 | Container Apps | ACR | 合計 |
+|---|---|---|---|---|
+| 10名 × 4時間 | 半日 | 約400円 | 800円 | 約1,200円 |
+| 20名 × 4時間 | 半日 | 約800円 | 800円 | 約1,600円 |
+| 20名 × 8時間 | 終日 | 約1,600円 | 800円 | 約2,400円 |
+
+いずれのケースもクレジット上限（約24,000円/月）に対して十分な余裕がある。ハンズオン終了後にリソースグループを削除すれば、以降の課金は発生しない。
+
+## 環境のライフサイクル
+
+| フェーズ | 操作 |
+|---|---|
+| 構築 | `Deploy-HandsonEnv.ps1 -UserCount N` を実行 |
+| 当日運用 | 参加者に配布されたURL・パスワードでブラウザからアクセス |
+| 片付け | `Remove-HandsonEnv.ps1` でリソースグループごと一括削除 |

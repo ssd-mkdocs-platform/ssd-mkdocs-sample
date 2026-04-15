@@ -1,0 +1,13 @@
+.git
+.venv
+node_modules
+.pnpm-store
+site
+infra
+scripts
+.github
+.rulesync
+.serena
+.claude
+*.md
+!docs/**/*.md
