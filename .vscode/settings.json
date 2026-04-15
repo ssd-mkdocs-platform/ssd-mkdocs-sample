@@ -2,10 +2,12 @@
   "cSpell.words": [
     "claudecode",
     "codexcli",
+    "davidanson",
     "dearu",
     "desumasu",
     "eastasia",
     "fseventsd",
+    "genai",
     "icsmedia",
     "japaneast",
     "joshi",
@@ -32,7 +34,8 @@
     "tschoonj",
     "wada",
     "weasyprint",
-    "winget"
+    "winget",
+    "yzhang"
   ],
   "textlint.configPath": ".textlintrc.json",
   "textlint.autoFixOnSave": false,

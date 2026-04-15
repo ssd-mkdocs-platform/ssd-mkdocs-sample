@@ -2,6 +2,10 @@
 sitecustomize.py
 /docs/assets/
 .pnpm-store/
+settings.json.local.json
+
+# Azure
+azure-config.json
 
 # Claude Code
 .claude/settings.local.json

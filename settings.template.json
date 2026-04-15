@@ -1,0 +1,10 @@
+{
+  "subscriptionId": "<your-subscription-id>",
+  "tenantId": "<your-tenant-id>",
+  "location": "japaneast",
+  "swaLocation": "eastasia",
+  "resourceGroup": "rg-<repository>-prod",
+  "staticWebApp": "stapp-<repository>-prod",
+  "managedIdentity": "id-<repository>-prod",
+  "federatedCredential": "fc-github-actions-main"
+}
