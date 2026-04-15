@@ -6,5 +6,6 @@
   "resourceGroup": "rg-<repository>-prod",
   "staticWebApp": "stapp-<repository>-prod",
   "managedIdentity": "id-<repository>-prod",
-  "federatedCredential": "fc-github-actions-main"
+  "federatedCredential": "fc-github-actions-main",
+  "ghcrImage": "ghcr.io/<owner>/handson-env"
 }

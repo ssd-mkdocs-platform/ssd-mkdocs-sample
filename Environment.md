@@ -4,8 +4,7 @@
 
 | リソース種別 | 数量 | 概略 |
 |---|---|---|
-| Container Registry (Basic) | 1 | ハンズオン用コンテナイメージの格納先 |
-| User Assigned Managed Identity | 1 | Container Apps → ACR 間のパスワードレス認証 |
+| GitHub Container Registry (ghcr.io) | 1 | ハンズオン用コンテナイメージの格納先（パブリック・無料） |
 | Log Analytics Workspace | 1 | コンテナログの収集・トラブルシューティング用 |
 | Container Apps Environment | 1 | 全参加者のコンテナが稼働する共有実行基盤 |
 | Container App | 参加者数 | 参加者ごとのcode-server環境（1 vCPU / 2 GiB） |
@@ -36,21 +35,17 @@
 │  Log Analytics                                   │
 └─────────────────────────────────────────────────┘
         ▲
-        │ イメージ取得 (Managed Identity 認証)
+        │ イメージ取得 (パブリック・認証不要)
         │
-   Container Registry
-   (ハンズオン用イメージを格納)
+   GitHub Container Registry
+   (ghcr.io / ハンズオン用イメージを格納)
 ```
 
 ## 構成要素の役割
 
-### Container Registry
+### GitHub Container Registry (ghcr.io)
 
-ハンズオン用コンテナイメージの保管場所。code-server・MkDocs・VS Code拡張機能・ハンズオン資材をすべて含んだイメージを格納する。イメージタグにはGitコミットハッシュを使用し、どのリビジョンのソースから構築されたかを追跡できるようにしている。
-
-### Managed Identity
-
-Container AppsがContainer Registryからイメージを取得する際の認証手段。AcrPullロールのみを付与し、イメージの読み取り専用アクセスに制限している。パスワードやトークンをContainer Appの設定に埋め込む必要がなくなり、資格情報の漏洩リスクを排除する。
+ハンズオン用コンテナイメージの保管場所。code-server・MkDocs・VS Code拡張機能・ハンズオン資材をすべて含んだイメージを格納する。イメージタグにはGitコミットハッシュを使用し、どのリビジョンのソースから構築されたかを追跡できるようにしている。パブリックパッケージとして公開するため、ストレージ・転送ともに無料で利用できる。
 
 ### Log Analytics Workspace
 
@@ -68,15 +63,16 @@ Container Apps Environmentのログ収集先。参加者のコンテナが起動
 - **パスワード認証**により、割り当てられた参加者のみがアクセスできる
 - **min-replicas=1** を設定し、スケールインによるコンテナ停止を防止する
 - 参加者がターミナルから`mkdocs serve`を起動し、コンテナ内部のport 8000でプレビューをSimple Browserから閲覧する（外部には公開しない）
+- ghcr.io のパブリックイメージを直接取得するため、認証設定は不要
 
 ## デプロイの仕組み
 
 環境の構築は `scripts/Deploy-HandsonEnv.ps1` で一括実行する。内部では2段階のBicepテンプレートを使用している。
 
-1. **`infra/main.bicep`** — Container Registry・Managed Identity・Log Analytics・Container Apps Environmentの共有インフラをデプロイ
+1. **`infra/main.bicep`** — Log Analytics・Container Apps Environmentの共有インフラをデプロイ
 2. **`infra/container-app.bicep`** — 参加者ごとのContainer Appをデプロイ（パスワードを個別生成）
 
-イメージのビルドは `az acr build` でContainer Registry上で実行し、ローカルのDocker環境を不要としている。
+イメージのビルドはローカルの Docker で実行し、ghcr.io にプッシュする。事前に `docker login ghcr.io` で認証しておく必要がある。
 
 ## コスト見通し
 
@@ -84,11 +80,9 @@ Visual Studio Enterpriseサブスクリプション付帯のAzureクレジット
 
 > 以下の円換算は $1 = 160円 で算出している。
 
-### 固定費（常時課金）
+### 固定費
 
-| リソース | 概算 | 備考 |
-|---|---|---|
-| Container Registry (Basic) | 約800円/月 | イメージ保管。ハンズオン終了後に削除すれば課金停止 |
+コンテナレジストリに ghcr.io（パブリック）を使用するため、Azure 側の固定費は発生しない。
 
 ### 従量課金（ハンズオン開催時のみ）
 
@@ -98,11 +92,11 @@ Visual Studio Enterpriseサブスクリプション付帯のAzureクレジット
 
 ### 想定シナリオ
 
-| 規模 | 時間 | Container Apps | ACR | 合計 |
-|---|---|---|---|---|
-| 10名 × 4時間 | 半日 | 約400円 | 800円 | 約1,200円 |
-| 20名 × 4時間 | 半日 | 約800円 | 800円 | 約1,600円 |
-| 20名 × 8時間 | 終日 | 約1,600円 | 800円 | 約2,400円 |
+| 規模 | 時間 | Container Apps | 合計 |
+|---|---|---|---|
+| 10名 × 4時間 | 半日 | 約400円 | 約400円 |
+| 20名 × 4時間 | 半日 | 約800円 | 約800円 |
+| 20名 × 8時間 | 終日 | 約1,600円 | 約1,600円 |
 
 いずれのケースもクレジット上限（約24,000円/月）に対して十分な余裕がある。ハンズオン終了後にリソースグループを削除すれば、以降の課金は発生しない。
 

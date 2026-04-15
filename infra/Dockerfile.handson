@@ -23,7 +23,8 @@ USER vscode
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/home/vscode/.local/bin:${PATH}"
 
-# プロジェクトファイルのコピー
+# プロジェクトファイルのコピー（WORKDIR はディレクトリを root 所有で作成するため、先に mkdir する）
+RUN mkdir -p /home/vscode/workspace
 WORKDIR /home/vscode/workspace
 COPY --chown=vscode:vscode . .
 
