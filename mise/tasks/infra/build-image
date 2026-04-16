@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run infra/scripts/Build-Image.ps1"
+set -euo pipefail
+exec pwsh -NoLogo -NoProfile -File "$MISE_PROJECT_ROOT/infra/scripts/Build-Image.ps1" "$@"

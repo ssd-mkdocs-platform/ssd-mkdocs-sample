@@ -126,4 +126,4 @@ Visual Studio Enterpriseサブスクリプションに付帯するAzureクレジ
 ## 7. 実装・設計メモ
 
 - 開発環境情報
-    - [settings.local.json](settings.local.json)
+    - `settings.local.json`

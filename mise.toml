@@ -1,0 +1,41 @@
+[tools]
+python = "3.13"
+uv = "0.9.17"
+node = "24.12.0"
+pnpm = "10.27.0"
+
+[env]
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+PUPPETEER_SKIP_DOWNLOAD = "true"
+
+[tasks.setup]
+description = "Install Python/Node dependencies for this repository"
+run = """
+uv sync --frozen
+uv run playwright install chromium
+CI=true pnpm install --frozen-lockfile
+"""
+
+[tasks.mkdocs]
+description = "Start the MkDocs live preview server"
+run = "pnpm run mkdocs"
+
+[tasks."mkdocs:build"]
+description = "Build the MkDocs static site"
+run = "pnpm run mkdocs:build"
+
+[tasks."mkdocs:build:svg"]
+description = "Build the site with Mermaid diagrams rendered to SVG"
+run = "pnpm run mkdocs:build:svg"
+
+[tasks."mkdocs:pdf"]
+description = "Generate the PDF output"
+run = "pnpm run mkdocs:pdf"
+
+[tasks."lint:text"]
+description = "Run textlint for README and docs"
+run = "pnpm run lint:text"
+
+[tasks."lint:text:fix"]
+description = "Apply textlint fixes for README and docs"
+run = "pnpm run lint:text:fix"

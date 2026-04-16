@@ -10,7 +10,7 @@
     "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
   },
   "remoteEnv": {
-    "PATH": "${containerEnv:PATH}:/home/vscode/.local/bin"
+    "PATH": "${containerEnv:PATH}:/home/vscode/.local/bin:/home/vscode/.local/share/mise/shims"
   },
   "forwardPorts": [8000],
   "portsAttributes": {

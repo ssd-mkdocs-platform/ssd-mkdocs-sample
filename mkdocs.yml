@@ -9,7 +9,11 @@ nav:
       - 利用方法: usage-guide.md
       - ユーザー環境構築: user-environment-setup.md
       - ドキュメント記述マニュアル: writing-guide.md
-  - クラウド環境構築: cloud-resources-setup.md
+  - 実行環境:
+      - 概要: 実行環境/index.md
+      - クラウド環境構築: 実行環境/cloud-resources-setup.md
+      - ハンズオン環境設計: 実行環境/handson.md
+      - ハンズオン環境情報: 実行環境/environment.md
   - アーキテクチャー:
       - 概要: アーキテクチャー/index.md
       - デプロイ構成: アーキテクチャー/deploy-architecture.md

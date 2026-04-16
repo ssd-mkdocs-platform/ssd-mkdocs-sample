@@ -6,10 +6,8 @@
 
 事前に以下のソフトウェアが利用可能な状態にしておくこと。
 
-- Python 3.13+
-- uv 0.9.17+
-- Node.js 24.12.0+
-- pnpm 10.27.0+
+- `mise`
+- PowerShell 7 (`pwsh`) ただし `infra/scripts` を実行する場合のみ必須
 
 ## 環境構築
 
@@ -36,12 +34,35 @@ sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 lib
 brew install python pango libffi
 ```
 
+### mise の導入
+
+#### Linux / macOS
+
+```bash
+curl https://mise.run | sh
+echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
+exec "$SHELL"
+```
+
+#### Windows
+
+```pwsh
+winget install jdx.mise
+```
+
 ### Node.js & Pythonパッケージの導入
 
 ```shell
-pnpm install
-uv sync
+mise install
+mise run setup
 ```
+
+`mise.toml` では以下のツールバージョンを固定している。
+
+- Python 3.13
+- uv 0.9.17
+- Node.js 24.12.0
+- pnpm 10.27.0
 
 ### VS Code拡張
 

@@ -35,13 +35,13 @@ GitHub Container Registry (ghcr.io)
 
 現在の実装では、環境構築に関わる主要ファイルは以下のとおりである。
 
-- インフラのエントリーポイント: [infra/scripts/Deploy-HandsonEnv.ps1](/home/ubuntu/genai-mkdocs-sample/infra/scripts/Deploy-HandsonEnv.ps1)
-- イメージビルド: [infra/scripts/Build-Image.ps1](/home/ubuntu/genai-mkdocs-sample/infra/scripts/Build-Image.ps1)
-- 環境削除: [infra/scripts/Remove-HandsonEnv.ps1](/home/ubuntu/genai-mkdocs-sample/infra/scripts/Remove-HandsonEnv.ps1)
-- 共有インフラ定義: [infra/azure/main.bicep](/home/ubuntu/genai-mkdocs-sample/infra/azure/main.bicep)
-- 参加者用アプリ定義: [infra/azure/container-app.bicep](/home/ubuntu/genai-mkdocs-sample/infra/azure/container-app.bicep)
-- 実行コンテナ定義: [infra/docker/Dockerfile](/home/ubuntu/genai-mkdocs-sample/infra/docker/Dockerfile)
-- デプロイ設定: [settings.local.json](/home/ubuntu/genai-mkdocs-sample/settings.local.json)
+- インフラのエントリーポイント: `infra/scripts/Deploy-HandsonEnv.ps1`
+- イメージビルド: `infra/scripts/Build-Image.ps1`
+- 環境削除: `infra/scripts/Remove-HandsonEnv.ps1`
+- 共有インフラ定義: `infra/azure/main.bicep`
+- 参加者用アプリ定義: `infra/azure/container-app.bicep`
+- 実行コンテナ定義: `infra/docker/Dockerfile`
+- デプロイ設定: `settings.local.json`
 
 詳細な Azure リソース定義、Container App の構成、パラメーター、命名規則、出力値は Bicep を参照すること。
 
@@ -49,7 +49,7 @@ GitHub Container Registry (ghcr.io)
 
 ### 構築
 
-環境構築は [infra/scripts/Deploy-HandsonEnv.ps1](/home/ubuntu/genai-mkdocs-sample/infra/scripts/Deploy-HandsonEnv.ps1) から実行する。スクリプトは `settings.local.json` を読み込み、必要に応じてコンテナイメージをビルド・プッシュし、その後 Azure 上へ共有インフラと参加者用 Container App 群をデプロイする。
+環境構築は `infra/scripts/Deploy-HandsonEnv.ps1` から実行する。スクリプトは `settings.local.json` を読み込み、必要に応じてコンテナイメージをビルド・プッシュし、その後 Azure 上へ共有インフラと参加者用 Container App 群をデプロイする。
 
 参加者情報の出力やログは、リポジトリ直下の `handson-out/` に保存される。
 
@@ -59,10 +59,10 @@ GitHub Container Registry (ghcr.io)
 
 ### 片付け
 
-環境削除は [infra/scripts/Remove-HandsonEnv.ps1](/home/ubuntu/genai-mkdocs-sample/infra/scripts/Remove-HandsonEnv.ps1) を利用する。削除対象の判定方法や一括削除の挙動はスクリプト実装を参照すること。
+環境削除は `infra/scripts/Remove-HandsonEnv.ps1` を利用する。削除対象の判定方法や一括削除の挙動はスクリプト実装を参照すること。
 
 ## 補足
 
-- 実行コンテナは [infra/docker/Dockerfile](/home/ubuntu/genai-mkdocs-sample/infra/docker/Dockerfile) で定義している。
-- ローカル開発用 Dev Container は [.devcontainer/devcontainer.json](/home/ubuntu/genai-mkdocs-sample/.devcontainer/devcontainer.json) で同じ Dockerfile を参照している。
+- 実行コンテナは `infra/docker/Dockerfile` で定義している。
+- ローカル開発用 Dev Container は `.devcontainer/devcontainer.json` で同じ Dockerfile を参照している。
 - 実装詳細を文書へ転記しすぎると乖離しやすいため、構成や挙動の正確な確認はコードを優先する。

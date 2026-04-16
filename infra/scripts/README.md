@@ -34,3 +34,16 @@ infra/scripts/
 # 個別テスト実行
 Invoke-Pester infra/scripts/tests/<対象>.Tests.ps1
 ```
+
+## npm スクリプト
+
+`package.json` にタスクが定義されており、`pnpm run` で呼び出せる。
+
+```shell
+pnpm run infra:test
+pnpm run infra:build-image -- -ImageTag v1.0.0
+pnpm run infra:deploy-handson-env -- -UserCount 20
+pnpm run infra:remove-handson-env -- -All
+```
+
+`--` 以降の引数は、そのまま PowerShell スクリプトに転送される。

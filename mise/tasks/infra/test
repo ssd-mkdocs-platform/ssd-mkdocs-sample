@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run all Pester tests under infra/scripts/tests"
+set -euo pipefail
+exec pwsh -NoLogo -NoProfile -File "$MISE_PROJECT_ROOT/infra/scripts/tests/Run-AllTests.ps1" "$@"
