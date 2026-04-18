@@ -4,15 +4,14 @@ title: 実行環境
 
 # 実行環境
 
-このセクションでは、`MkDocs` サンプルを支える専用実行環境を説明する。
+このセクションでは、`MkDocs` サンプルを支える実行環境を説明する。
 
-このリポジトリは文書基盤サンプルが主役であり、実行環境はその再現性と配布性を担保するために同じリポジトリへ同居させている。
+実行環境（Docker イメージ、Azure Container Apps スクリプト、ハンズオン配布インフラ）は別リポジトリ [genai-docs/genai-docs-env](https://github.com/genai-docs/genai-docs-env) に切り出して管理している。本リポジトリはサンプル本体（ドキュメント内容と DevContainer 設定）に集中する。
 
 ## 役割分担
 
-- サンプル本体： `docs/`, `mkdocs.yml`, `pyproject.toml`, `package.json`, `mise.toml`
-- ローカル開発環境： `.devcontainer/`, `infra/docker/`
-- ハンズオン運用： `infra/azure/`, `infra/scripts/`, `settings.template.json`
+- サンプル本体（当リポジトリ）： `docs/`, `mkdocs.yml`, `pyproject.toml`, `package.json`, `mise.toml`, `.devcontainer/`
+- 実行環境（[genai-docs-env](https://github.com/genai-docs/genai-docs-env)）： Docker イメージ定義、Azure Container Apps 運用スクリプト、Bicep、GHCR 公開 CI
 
 ## ドキュメント
 

@@ -1,7 +1,0 @@
-{
-  "subscriptionId": "<your-subscription-id>",
-  "tenantId": "<your-tenant-id>",
-  "location": "japaneast",
-  "resourceGroup": "rg-<repository>-hands-on",
-  "ghcrImage": "ghcr.io/<owner>/handson-env"
-}

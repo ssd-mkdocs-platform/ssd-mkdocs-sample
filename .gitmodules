@@ -1,0 +1,3 @@
+[submodule "external/genai-docs-env"]
+	path = external/genai-docs-env
+	url = https://github.com/genai-docs/genai-docs-env.git

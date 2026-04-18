@@ -50,13 +50,11 @@ nr marp:build        # docs/スライド/dist に PDF を出力
 | 系統 | 呼び出し方 | 用途 |
 |------|------------|------|
 | `package.json` scripts | `nr <script>` | ドキュメントのプレビュー／ビルド／品質チェック／スライド |
-| `mise.toml` tasks | `mise run <task>` | 環境構築、コンテナイメージのビルド／起動、ハンズオン環境の Azure デプロイ、テスト |
-
-両者は機能的に重複しておらず、用途ごとに排他的に定義されている。たとえばインフラ系は `mise run` 側で管理する。
+| `mise.toml` tasks | `mise run <task>` | ローカル開発環境のセットアップ（ランタイム・OS 依存の導入） |
 
 ```shell
-mise run test                                   # Pester テスト実行
-mise run build-image                            # ハンズオン用コンテナイメージをローカルビルド
-mise run deploy-handson-env -- -UserCount 20    # Azure にハンズオン環境をデプロイ
-mise run remove-handson-env -- -All             # ハンズオン環境を撤去
+mise run setup-system   # Debian/Ubuntu のシステム依存導入（初回のみ、sudo）
+mise run setup          # Python / Node 依存とランタイム導入
 ```
+
+ハンズオン環境の Docker イメージビルドや Azure デプロイは別リポジトリ [genai-docs/genai-docs-env](https://github.com/genai-docs/genai-docs-env) に分離している。該当作業は env リポジトリ側で実行する。

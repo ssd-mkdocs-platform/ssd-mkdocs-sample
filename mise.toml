@@ -20,39 +20,3 @@ uv sync --frozen
 uv run playwright install chromium
 CI=true pnpm install --frozen-lockfile
 """
-
-[tasks.build-image]
-description = "Build the hands-on container image (Build-Image.ps1)"
-run = "pwsh -File infra/scripts/Build-Image.ps1"
-
-[tasks.run-local]
-description = "Run the hands-on image locally (Run-Local.ps1)"
-run = "pwsh -File infra/scripts/Run-Local.ps1"
-
-[tasks.run-remote]
-description = "Run the hands-on image from a remote registry (Run-Remote.ps1)"
-run = "pwsh -File infra/scripts/Run-Remote.ps1"
-
-[tasks.release-tag]
-description = "Create a Release-v<semver> tag (New-ReleaseTag.ps1)"
-run = "pwsh -File infra/scripts/New-ReleaseTag.ps1"
-
-[tasks.deploy-handson-env]
-description = "Deploy the hands-on environment to Azure (Deploy-HandsonEnv.ps1)"
-run = "pwsh -File infra/scripts/Deploy-HandsonEnv.ps1"
-
-[tasks.remove-handson-env]
-description = "Remove the hands-on environment from Azure (Remove-HandsonEnv.ps1)"
-run = "pwsh -File infra/scripts/Remove-HandsonEnv.ps1"
-
-[tasks.update-handson-image]
-description = "Update Container Apps in existing RG to ghcr :latest (Update-HandsonImage.ps1)"
-run = "pwsh -File infra/scripts/Update-HandsonImage.ps1"
-
-[tasks.get-handson-env]
-description = "List hands-on resource groups and their provisioning state (Get-HandsonEnv.ps1)"
-run = "pwsh -File infra/scripts/Get-HandsonEnv.ps1"
-
-[tasks.test]
-description = "Run Pester tests for infra scripts (Run-AllTests.ps1)"
-run = "pwsh -File infra/scripts/tests/Run-AllTests.ps1"
