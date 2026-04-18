@@ -1,0 +1,35 @@
+{
+  "lockfileVersion": 1,
+  "sources": {
+    "dyoshikawa/rulesync": {
+      "requestedRef": "main",
+      "resolvedRef": "38589b83aa138dc6f67a331e93fd37c5e8d63a95",
+      "resolvedAt": "2026-04-18T03:14:41.263Z",
+      "skills": {
+        "rulesync": {
+          "integrity": "sha256-164c0551c1eb87349dc51b1c7b733fb971252e5b17788155df9187a19f652490"
+        }
+      }
+    },
+    "jgraph/drawio-mcp:skill-cli": {
+      "requestedRef": "main",
+      "resolvedRef": "b3bcf98f0cfe49e431e4503ad3a8e6c59de9cd12",
+      "resolvedAt": "2026-04-18T03:14:42.388Z",
+      "skills": {
+        "drawio": {
+          "integrity": "sha256-5b8569a3e31c71071c6df2a1e9ff9522675c7a666378510a73050914036bcbe2"
+        }
+      }
+    },
+    "microsoft/playwright-cli": {
+      "requestedRef": "main",
+      "resolvedRef": "0406adaed4c6ba95bbfa6952229e76188bc59993",
+      "resolvedAt": "2026-04-18T03:15:44.079Z",
+      "skills": {
+        "playwright-cli": {
+          "integrity": "sha256-b25589ecbaec6a129f003bee1ecca1b8b3849bf42c90781975008e066df2b82f"
+        }
+      }
+    }
+  }
+}

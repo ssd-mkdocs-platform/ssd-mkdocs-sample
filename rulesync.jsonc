@@ -12,6 +12,11 @@
   "baseDirs": [
     "."
   ],
+  "sources": [
+     { "source": "dyoshikawa/rulesync", "skills": ["rulesync"] },
+     { "source": "jgraph/drawio-mcp:skill-cli", "skills": ["drawio"] },
+     { "source": "microsoft/playwright-cli", "skills": ["playwright-cli"] }
+  ],
   "delete": true,
   "verbose": false,
   "global": false,
