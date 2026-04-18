@@ -1,15 +1,13 @@
 {
   "targets": [
-    "copilot",
     "claudecode",
-    "codexcli"
+    "codexcli",
+    "copilot",
+    "cursor"
   ],
   "features": [
     "rules",
-    "ignore",
-    "mcp",
-    "commands",
-    "subagents"
+    "skills"
   ],
   "baseDirs": [
     "."
