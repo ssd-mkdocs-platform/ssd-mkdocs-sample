@@ -8,16 +8,16 @@ title: デプロイ構成
 
 ## 概要
 
-本システムは GitHub と Azure を組み合わせたハイブリッド構成で、以下の特徴を持つ。
+本システムはGitHubとAzureを組み合わせたハイブリッド構成で、以下の特徴を持つ。
 
-- **デュアルデプロイ**: GitHub Pages と Azure Static Web Apps（SWA）への同時デプロイ
-- **役割の分離**: 広範な閲覧は GitHub Pages、PRプレビューや限定配布は SWA を主に使用（同一成果物を両環境へ配布）
-- **スケーラビリティ**: SWA のロール認証制限（25人）を補うため、広範な閲覧には Pages を活用
-- **OIDC認証**: Sync Role が OIDC で Azure にログインして SWA ロールを同期（Azure 資格情報の長期保存を回避）
-- **SWA API トークン**: Deploy Site / Close Preview が `AZURE_SWA_API_TOKEN` で SWA へデプロイ・プレビュー削除
-- **ロールベースアクセス制御**: リポジトリ権限に基づく閲覧制御（SWA および Enterprise 版 Pages）
-- **招待管理**: GitHub Discussions を活用した閲覧権限の配布と承認フロー（SWA用）
-- **最適化されたビルド**: Web 表示用には軽量な SVG、PDF 生成用には互換性の高い PNG を使い分け
+- **デュアルデプロイ**: GitHub PagesとAzure Static Web Apps（SWA）への同時デプロイ
+- **役割の分離**: 広範な閲覧はGitHub Pages、PRプレビューや限定配布はSWAを主に使用（同一成果物を両環境へ配布）
+- **スケーラビリティ**: SWAのロール認証制限（25人）を補うため、広範な閲覧にはPagesを活用
+- **OIDC認証**: Sync RoleがOIDCでAzureにログインしてSWAロールを同期（Azure資格情報の長期保存を回避）
+- **SWA API トークン**: Deploy Site / Close Previewが `AZURE_SWA_API_TOKEN` でSWAへデプロイ・プレビュー削除
+- **ロールベースアクセス制御**: リポジトリ権限に基づく閲覧制御（SWAおよびEnterprise版Pages）
+- **招待管理**: GitHub Discussionsを活用した閲覧権限の配布と承認フロー（SWA用）
+- **最適化されたビルド**: Web表示用には軽量なSVG、PDF生成用には互換性の高いPNGを使い分け
 
 ## 配置モデル
 
@@ -157,7 +157,7 @@ sequenceDiagram
 
 **注意**:
 
-- fork からの Pull Request では `AZURE_SWA_API_TOKEN` が利用できず、SWA のプレビュー作成/削除に失敗する可能性がある。SWA プレビューを有効にする場合は「同一リポジトリ内 PR」を前提とし、必要に応じてワークフロー側で fork PR をスキップする。
+- forkからのPull Requestでは `AZURE_SWA_API_TOKEN` が利用できず、SWAのプレビュー作成/削除に失敗する可能性がある。SWAプレビューを有効にする場合は「同一リポジトリ内PR」を前提とし、必要に応じてワークフロー側でfork PRをスキップする。
 
 ### ロール同期
 
@@ -190,7 +190,7 @@ sequenceDiagram
 
 ### OIDC フェデレーション
 
-Sync Role の Azure への認証には OIDC（OpenID Connect）を使用する。これにより Azure 資格情報（クライアントシークレット等）の長期保存が不要となる。
+Sync RoleのAzureへの認証にはOIDC（OpenID Connect）を使用する。これによりAzure資格情報（クライアントシークレット等）の長期保存が不要となる。
 
 ```mermaid
 flowchart LR
@@ -212,7 +212,7 @@ flowchart LR
 
 ### SWA デプロイの認証
 
-SWA へのデプロイと PR プレビューの削除には `AZURE_SWA_API_TOKEN`（GitHub Secrets）を使用する。
+SWAへのデプロイとPRプレビューの削除には `AZURE_SWA_API_TOKEN`（GitHub Secrets）を使用する。
 
 **信頼関係の設定**:
 
@@ -222,7 +222,7 @@ SWA へのデプロイと PR プレビューの削除には `AZURE_SWA_API_TOKEN
 
 ### SWA 認証フロー
 
-Azure Static Web Apps は組み込みの認証機能を提供する。
+Azure Static Web Appsは組み込みの認証機能を提供する。
 
 ```mermaid
 flowchart LR
@@ -247,6 +247,6 @@ flowchart LR
 
 ## 関連ドキュメント
 
-- [ワークフロー アーキテクチャ](workflow-architecture.md) - GitHub Actions ワークフローの詳細
-- [クラウド環境構築](../実行環境/cloud-resources-setup.md) - Azure / GitHub リソースの構築手順
-- [テキスト校正](text-validation.md) - textlint による品質管理
+- [ワークフロー アーキテクチャ](workflow-architecture.md) - GitHub Actionsワークフローの詳細
+- [クラウド環境構築](../実行環境/cloud-resources-setup.md) - Azure / GitHubリソースの構築手順
+- [テキスト校正](text-validation.md) - textlintによる品質管理

@@ -1,10 +1,10 @@
 # ハンズオン実行環境
 
-この文書は、ハンズオン実行環境の全体像と運用導線をまとめたものである。Azure リソース定義や各パラメーターの詳細は文書に重複記載せず、実装そのものを正として Bicep / スクリプトを参照する。
+この文書は、ハンズオン実行環境の全体像と運用導線をまとめたものである。Azureリソース定義や各パラメーターの詳細は文書に重複記載せず、実装そのものを正としてBicep / スクリプトを参照する。
 
 ## 構成概要
 
-参加者がブラウザのみで作業できるよう、Azure Container Apps 上に参加者ごとの `code-server` 環境をデプロイする。コンテナイメージは `ghcr.io` に格納し、Container Apps から取得する。
+参加者がブラウザのみで作業できるよう、Azure Container Apps上に参加者ごとの `code-server` 環境をデプロイする。コンテナイメージは `ghcr.io` に格納し、Container Appsから取得する。
 
 ```text
 参加者 (ブラウザ)
@@ -43,19 +43,19 @@ GitHub Container Registry (ghcr.io)
 - 実行コンテナー定義： `infra/docker/Dockerfile`
 - デプロイ設定： `settings.local.json`
 
-詳細な Azure リソース定義、Container App の構成、パラメーター、命名規則、出力値は Bicep を参照すること。
+詳細なAzureリソース定義、Container Appの構成、パラメーター、命名規則、出力値はBicepを参照すること。
 
 ## 運用フロー
 
 ### 構築
 
-環境構築は `infra/scripts/Deploy-HandsonEnv.ps1` から実行する。スクリプトは `settings.local.json` を読み込み、必要に応じてコンテナイメージをビルド・プッシュし、その後 Azure 上へ共有インフラと参加者用 Container App 群をデプロイする。
+環境構築は `infra/scripts/Deploy-HandsonEnv.ps1` から実行する。スクリプトは `settings.local.json` を読み込み、必要に応じてコンテナイメージをビルド・プッシュし、その後Azure上へ共有インフラと参加者用Container App群をデプロイする。
 
 参加者情報の出力やログは、リポジトリ直下の `handson-out/` に保存される。
 
 ### 当日運用
 
-参加者は配布された URL とパスワードで `code-server` にログインする。`mkdocs serve` の起動は参加者の操作で行い、プレビューはコンテナー内部の `localhost:8000` を利用する前提である。
+参加者は配布されたURLとパスワードで `code-server` にログインする。`mkdocs serve` の起動は参加者の操作で行い、プレビューはコンテナー内部の `localhost:8000` を利用する前提である。
 
 ### 片付け
 
@@ -63,6 +63,6 @@ GitHub Container Registry (ghcr.io)
 
 ## 補足
 
-- ハンズオン配布用の実行コンテナーは `infra/docker/Dockerfile` で定義し、CI で `ghcr.io/genai-docs/handson-env:latest` として公開している。
-- ローカル開発用 Dev Container は `.devcontainer/Dockerfile` で同ハンズオンイメージの `:latest` をベースとして使う構成である。
+- ハンズオン配布用の実行コンテナーは `infra/docker/Dockerfile` で定義し、CIで `ghcr.io/genai-docs/handson-env:latest` として公開している。
+- ローカル開発用Dev Containerは `.devcontainer/Dockerfile` で同ハンズオンイメージの `:latest` をベースとして使う構成である。
 - 実装詳細を文書へ転記しすぎると乖離しやすいため、構成や挙動の正確な確認はコードを優先する。

@@ -4,11 +4,11 @@ title: ワークフロー アーキテクチャ
 
 # ワークフロー アーキテクチャ
 
-本リポジトリで使用する GitHub Actions ワークフローの実行条件と内部構造について説明する。
+本リポジトリで使用するGitHub Actionsワークフローの実行条件と内部構造について説明する。
 
 ## ワークフロー概要
 
-本システムでは以下の 4 つのワークフローを使用する。
+本システムでは以下の4つのワークフローを使用する。
 
 ```mermaid
 flowchart TB
@@ -163,10 +163,10 @@ flowchart TD
 #### deploy-GitHub-pages ジョブ
 
 **依存**: `build` ジョブ完了後  
-**実行条件**: main ブランチへの push 時のみ
+**実行条件**: mainブランチへのpush時のみ
 
 !!! note "別ジョブとして分離している理由"
-    GitHub Pages へのデプロイは `build` ジョブに統合せず、別ジョブとして実装している。理由は以下の通り。
+    GitHub Pagesへのデプロイは `build` ジョブに統合せず、別ジョブとして実装している。理由は以下の通り。
     
     1. **Environments UI での追跡**: `environment` 設定により、GitHub UI の「Environments」タブでデプロイ履歴とステータスを確認可能
     2. **リトライ容易性**: デプロイ失敗時に `build` を再実行せず、デプロイのみをリトライ可能
@@ -176,7 +176,7 @@ flowchart TD
 
 ## Close Preview ワークフロー
 
-PR がクローズされた際に、Azure SWA のプレビュー環境を削除する専用ワークフロー。
+PRがクローズされた際に、Azure SWAのプレビュー環境を削除する専用ワークフロー。
 
 ### 実行条件
 
@@ -215,7 +215,7 @@ flowchart TD
 
 #### close-preview ジョブ
 
-Azure Static Web Apps のプレビュー環境を削除する。
+Azure Static Web Appsのプレビュー環境を削除する。
 
 | ステップ | 説明 | 使用アクション |
 |---------|------|---------------|
@@ -286,7 +286,7 @@ flowchart TD
 
 #### cleanup ジョブ
 
-期限切れの招待 Discussion を削除する。
+期限切れの招待Discussionを削除する。
 
 | ステップ | 説明 | 使用アクション |
 |---------|------|---------------|
@@ -297,7 +297,7 @@ flowchart TD
 
 **依存**: `cleanup` ジョブ完了後
 
-GitHub リポジトリ権限に基づき Azure SWA のロールを同期し、招待 URL を Discussions に登録する。
+GitHubリポジトリ権限に基づきAzure SWAのロールを同期し、招待URLをDiscussionsに登録する。
 
 | ステップ | 説明 | 使用アクション |
 |---------|------|---------------|
@@ -364,7 +364,7 @@ flowchart TD
 
 #### textlint ジョブ
 
-Markdown 文書の日本語品質をチェックする。
+Markdown文書の日本語品質をチェックする。
 
 | ステップ | 説明 | 備考 |
 |---------|------|-----|
@@ -411,5 +411,5 @@ flowchart TB
 ## 関連ドキュメント
 
 - [デプロイ構成](deploy-architecture.md) - デプロイアーキテクチャの詳細
-- [テキスト校正](text-validation.md) - textlint のルール設定
-- [クラウド環境構築](../実行環境/cloud-resources-setup.md) - Azure / GitHub リソースの構築手順
+- [テキスト校正](text-validation.md) - textlintのルール設定
+- [クラウド環境構築](../実行環境/cloud-resources-setup.md) - Azure / GitHubリソースの構築手順

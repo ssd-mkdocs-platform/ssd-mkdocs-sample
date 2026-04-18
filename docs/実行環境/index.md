@@ -16,6 +16,6 @@ title: 実行環境
 
 ## ドキュメント
 
-- [クラウド環境構築](cloud-resources-setup.md) - GitHub Pages / Azure Static Web Apps の公開基盤を構築する
-- [ハンズオン環境設計](handson.md) - Azure Container Apps を使った配布用環境の設計方針
+- [クラウド環境構築](cloud-resources-setup.md) - GitHub Pages / Azure Static Web Appsの公開基盤を構築する
+- [ハンズオン環境設計](handson.md) - Azure Container Appsを使った配布用環境の設計方針
 - [ハンズオン環境情報](environment.md) - 実装と運用導線の対応関係

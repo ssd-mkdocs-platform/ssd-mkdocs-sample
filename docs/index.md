@@ -31,19 +31,19 @@ exec "$SHELL"
 
 ### 2.依存関係のインストール
 
-Debian / Ubuntu 系ではまず WeasyPrint や Playwright のネイティブ依存（Chromium、Pango、Cairo、日本語フォントなど）を apt で導入する。`sudo`が必要で、初回のみ実行する。
+Debian / Ubuntu系ではまずWeasyPrintやPlaywrightのネイティブ依存（Chromium、Pango、Cairo、日本語フォントなど）をaptで導入する。`sudo`が必要で、初回のみ実行する。
 
 ```bash
 mise run setup-system
 ```
 
-続いてランタイムと Python / Node の依存関係をまとめて取得する。
+続いてランタイムとPython / Nodeの依存関係をまとめて取得する。
 
 ```bash
 mise run setup      # mise install / uv sync / Playwright / pnpm install をまとめて実行
 ```
 
-macOS や Windows、その他のディストリビューションでは `setup-system`は対象外である。該当環境ではネイティブ依存を個別に導入する必要があるため、DevContainer または code-server の利用を推奨する。
+macOSやWindows、その他のディストリビューションでは `setup-system`は対象外である。該当環境ではネイティブ依存を個別に導入する必要があるため、DevContainerまたはcode-serverの利用を推奨する。
 
 ### 3.ドキュメントのプレビュー
 
@@ -53,7 +53,7 @@ pnpm mkdocs         # http://127.0.0.1:8000 でライブプレビュー
 
 ## DevContainer
 
-VS Code の**Dev Containers**拡張を導入し、リポジトリを開いた際に表示される「Reopen in Container」を選ぶと、`.devcontainer/devcontainer.json`が `.devcontainer/Dockerfile`をビルドして起動する。
+VS Codeの**Dev Containers**拡張を導入し、リポジトリを開いた際に表示される「Reopen in Container」を選ぶと、`.devcontainer/devcontainer.json`が `.devcontainer/Dockerfile`をビルドして起動する。
 
 当DockerfileはGHCRに公開済みの下記ハンズオンイメージをベースにしており、ビルドはベースイメージのpullのみで完了するためホスト側に`mise`やPythonを入れずに同じツール構成で作業できる。
 
@@ -98,7 +98,7 @@ mise run build-image   # infra/docker/Dockerfile を :latest でビルド
 mise run run-local     # http://localhost:8080 で code-server 起動
 ```
 
-GitHub Container Registry に公開済みのイメージを使う場合。
+GitHub Container Registryに公開済みのイメージを使う場合。
 
 ```bash
 mise run run-remote    # settings.local.json の ghcrImage を pull して起動
