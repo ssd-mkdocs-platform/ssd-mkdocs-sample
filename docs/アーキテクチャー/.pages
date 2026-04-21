@@ -1,0 +1,5 @@
+title: アーキテクチャー
+nav:
+  - 概要: index.md
+  - ワークフロー アーキテクチャ: workflow-architecture.md
+  - テキスト検証: text-validation.md

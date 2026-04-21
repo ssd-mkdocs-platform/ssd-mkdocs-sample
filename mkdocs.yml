@@ -3,38 +3,6 @@ site_description: Best practices for business system documentation and a collect
 site_author: Documentation Team
 copyright: Copyright &copy; 2024 @nuits.jp
 
-nav:
-  - ホーム: index.md
-  - ユーザーガイド: usage-guide.md
-  - 技術スタック: tech-stack.md
-  - 実行環境:
-      - 概要: 実行環境/index.md
-      - クラウド環境構築: 実行環境/cloud-resources-setup.md
-      - ハンズオン環境設計: 実行環境/handson.md
-      - ハンズオン環境情報: 実行環境/environment.md
-  - ハンズオン準備:
-      - 概要: ハンズオン準備/index.md
-      - VS Code の初期化: ハンズオン準備/01.vscode.md
-      - GitHub リポジトリの準備: ハンズオン準備/02.github.md
-      - Claude Code のサインイン: ハンズオン準備/03.claude-code.md
-      - Cursor CLI のサインイン: ハンズオン準備/04.cursor.md
-      - Codex CLI のサインイン: ハンズオン準備/05.codex.md
-      - GitHub Copilot CLI のサインイン: ハンズオン準備/06.copilot.md
-  - アーキテクチャー:
-      - 概要: アーキテクチャー/index.md
-      - ワークフロー アーキテクチャ: アーキテクチャー/workflow-architecture.md
-      - テキスト検証: アーキテクチャー/text-validation.md
-  - サンプル:
-      - 目次: サンプル/index.md
-      - Mermaid: サンプル/mermaid.md
-      - Draw.io: サンプル/draw-io.md
-      - Marp: サンプル/marp.md
-      - Marp サンプル: サンプル/marp-sample.md
-  - スライド:
-      - 一覧: スライド/index.md
-      - 生成AI時代のドキュメント基盤: スライド/genai-documentation-infrastructure.md
-      - Marp: スライド/marp.md
-
 theme:
   name: material
   language: ja
@@ -68,6 +36,7 @@ watch:
 
 plugins:
   - search
+  - awesome-pages
   - mermaid-to-svg:
       enabled_if_env: RENDER_SVG
       image_id_enabled: true

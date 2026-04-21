@@ -1,0 +1,9 @@
+title: ハンズオン準備
+nav:
+  - 概要: index.md
+  - VS Code の初期化: 01.vscode.md
+  - GitHub リポジトリの準備: 02.github.md
+  - Claude Code のサインイン: 03.claude-code.md
+  - Cursor CLI のサインイン: 04.cursor.md
+  - Codex CLI のサインイン: 05.codex.md
+  - GitHub Copilot CLI のサインイン: 06.copilot.md

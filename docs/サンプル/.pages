@@ -1,0 +1,7 @@
+title: サンプル
+nav:
+  - 目次: index.md
+  - Mermaid: mermaid.md
+  - Draw.io: draw-io.md
+  - Marp: marp.md
+  - Marp サンプル: marp-sample.md
